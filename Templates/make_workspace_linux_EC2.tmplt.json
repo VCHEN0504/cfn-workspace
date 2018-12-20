@@ -116,13 +116,13 @@
       "AllowedPattern": "^$|^http://.*$|^https://.*$",
       "Description": "URL the file containing the admin users' SSH public keys.",
       "Type": "String",
-	  "Default": "https://s3.amazonaws.com/dotc-common/Miscellaneous/AdminKeys.txt"
+	  "Default": ""
     },
     "AmiId": {
       "AllowedPattern": "^ami-[0-9a-z]{8}$|^ami-[0-9a-z]{17}$",
       "Description": "ID of the AMI to launch",
       "Type": "String",
-	  "Default":"ami-0c066bc63147ab6bd"
+	  "Default":""
     },
     "CfnEndpointUrl": {
       "AllowedPattern": "^$|^http[s]?://.*$",
@@ -160,7 +160,7 @@
     "KeyPairName": {
       "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
       "Type": "AWS::EC2::KeyPair::KeyName",
-	  "Default": "vchen-dev"
+	  "Default": ""
     },
     "NoPublicIp": {
       "AllowedValues": [
@@ -214,12 +214,12 @@
     "SecurityGroupIds": {
       "Description": "List of security groups to apply to the instance",
       "Type": "List<AWS::EC2::SecurityGroup::Id>",
-	  "Default": "sg-6bffc618,sg-0cb0810bc85da4547"
+	  "Default": ""
     },
     "SubnetId": {
       "Description": "ID of the subnet to assign to the instance",
       "Type": "AWS::EC2::Subnet::Id",
-	  "Default": "subnet-10cf243d"
+	  "Default": ""
     },
 	"InstallerUserName": {
       "AllowedPattern": "^[a-z][a-z0-9_]*[a-z0-9]*$",
