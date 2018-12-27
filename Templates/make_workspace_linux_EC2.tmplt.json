@@ -15,12 +15,54 @@
       "Fn::Not": [
         { "Fn::Equals": [ { "Ref": "PrivateIp" }, "" ] }
       ]
+    },	
+    "CreateAppVolume": {
+      "Fn::Equals": [ { "Ref": "AppVolumeDevice" }, "true" ]
     },
     "InstallUpdates": {
       "Fn::Not": [
         { "Fn::Equals": [ { "Ref": "NoUpdates" }, "true" ] }
       ]
     },
+	"NotGenFive": {
+      "Fn::Not": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                { "Fn::Select": [
+                    "0",
+                    { "Fn::Split": [ ".", { "Ref": "InstanceType" } ] }
+                  ]
+                },
+                "c5"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                { "Fn::Select": [
+                    "0",
+                    { "Fn::Split": [ ".", { "Ref": "InstanceType" } ] }
+                  ]
+                },
+                "m5"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                { "Fn::Select": [
+                    "0",
+                    { "Fn::Split": [ ".", { "Ref": "InstanceType" } ] }
+                  ]
+                },
+                "t3"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
     "Reboot": {
       "Fn::Not": [
         { "Fn::Equals": [ { "Ref": "NoReboot" }, "true" ] }
@@ -43,7 +85,18 @@
     }
   },
   "Description": "This template deploys a standalone Linux instance to host a Workspace.",
-  "Mappings": {},
+  "Mappings": {
+    "InstanceTypeCapabilities": {
+      "IsGenFive": {
+        "ExternDeviceName": "/dev/xvdf",
+        "InternDeviceName": "/dev/nvme1n1"
+      },
+      "PreGenFive": {
+        "ExternDeviceName": "/dev/xvdf",
+        "InternDeviceName": "/dev/xvdf"
+      }
+    }
+  },
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
@@ -61,6 +114,17 @@
             "NoReboot",
             "NoUpdates",
             "SecurityGroupIds"
+          ]
+        },
+		{
+          "Label": {
+            "default": "Workspace Tool EBS Volume"
+          },
+          "Parameters": [
+            "AppVolumeDevice",
+            "AppVolumeMountPath",
+            "AppVolumeSize",
+            "AppVolumeType"
           ]
         },
         {
@@ -122,7 +186,7 @@
       "AllowedPattern": "^ami-[0-9a-z]{8}$|^ami-[0-9a-z]{17}$",
       "Description": "ID of the AMI to launch",
       "Type": "String",
-	  "Default":""
+	  "Default":"ami-0c066bc63147ab6bd"
     },
     "CfnEndpointUrl": {
       "AllowedPattern": "^$|^http[s]?://.*$",
@@ -140,7 +204,7 @@
     "InstanceRole": {
       "Description": "(Optional) IAM instance role to apply to the instance",
       "Type": "String",
-	  "Default": "Workspaces_IAM_Role"
+	  "Default": ""
     },
     "InstanceType": {
       "AllowedValues": [
@@ -155,7 +219,7 @@
       ],
       "Description": "Amazon EC2 instance type",
       "Type": "String",
-      "Default": "t2.large"
+      "Default": ""
     },
     "KeyPairName": {
       "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
@@ -203,7 +267,13 @@
       "AllowedPattern": "[a-z0-9]{6,12}+",
       "ConstraintDescription": "Alphanumeric string between 6 and 12 characters.",
       "Default": "maintuser",
-      "Description": "Default login user account name (do not use \"maintuser\").",
+      "Description": "Default login user account name.",
+      "Type": "String"
+    },
+	"VNCServerPasswd": {
+      "ConstraintDescription": "Password must contain at least one letter, at least one number, and be longer than six charaters.",
+      "Default": "",
+      "Description": "Default VNC server password",
       "Type": "String"
     },
     "PyStache": {
@@ -244,7 +314,50 @@
       ],
       "Description": "Environment in which the instance is being deployed",
       "Type": "String",
-      "Default": "dev"
+      "Default": ""
+    },
+	"RootVolumeSize": {
+      "ConstraintDescription": "Must be between 20GB and 16384GB.",
+      "Default": "",
+      "Description": "Size in GB of the EBS volume to create. If smaller than AMI defaul, create operation will fail; If larger, root device-volume's partition size will be increased",
+      "MaxValue": "16384",
+      "MinValue": "20",
+      "Type": "Number"
+    },
+	"AppVolumeDevice": {
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "true",
+      "Description": "Decision on whether to mount an extra EBS volume. Leave as default (\"false\") to launch without an extra application volume",
+      "Type": "String"
+    },
+    "AppVolumeMountPath": {
+      "AllowedPattern": "/.*",
+      "Default": "",
+      "Description": "Filesystem path to mount the extra app volume. Ignored if \"AppVolumeDevice\" is false",
+      "Type": "String"
+    },
+    "AppVolumeSize": {
+      "ConstraintDescription": "Must be between 1GB and 16384GB.",
+      "Default": "",
+      "Description": "Size in GB of the EBS volume to create. Ignored if \"AppVolumeDevice\" is false",
+      "MaxValue": "16384",
+      "MinValue": "1",
+      "Type": "Number"
+    },
+    "AppVolumeType": {
+      "AllowedValues": [
+        "gp2",
+        "io1",
+        "sc1",
+        "st1",
+        "standard"
+      ],
+      "Default": "gp2",
+      "Description": "Type of EBS volume to create. Ignored if \"AppVolumeDevice\" is false",
+      "Type": "String"
     }
   },
   "Resources": {
@@ -252,7 +365,7 @@
       "CreationPolicy": {
         "ResourceSignal": {
           "Count": "1",
-          "Timeout": "PT30M"
+          "Timeout": "PT60M"
         }
       },
       "Metadata": {
@@ -269,6 +382,44 @@
           ]
         },
         "AWS::CloudFormation::Init": {
+		  "admkey-install": {
+            "commands": {
+              "1-install-keyfile": {
+                "command": "bash -xe /etc/cfn/scripts/admkey.sh"
+              }
+            },
+            "files": {
+              "/etc/cfn/files/AdminKeys.pub": {
+                "source": { "Ref": "AdminPubkeyURL" },
+                "group": "root",
+                "mode": "000600",
+                "owner": "root"
+              },
+              "/etc/cfn/scripts/admkey.sh": {
+              "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "#!/bin/bash\n\n",
+                      "PROVHOME=$(getent passwd ",
+                      { "Ref": "ProvisionUser" },
+                      " | awk -F\":\" '{print $6}')\n",
+                      "\n",
+                      "install -b -m 000600 -o ",
+                      { "Ref": "ProvisionUser" },
+                      " -g ",
+                      { "Ref": "ProvisionUser" },
+                      " /etc/cfn/files/AdminKeys.pub ${PROVHOME}/.ssh/authorized_keys\n",
+                      "\n"
+                    ]
+                  ]
+                },
+                "group": "root",
+                "mode": "000700",
+                "owner": "root"
+              }
+            }
+          },
           "configSets": {
             "launch": [
               "setup",
@@ -539,13 +690,45 @@
       },
       "Properties": {
         "BlockDeviceMappings": [
-          {
+         {
             "DeviceName": "/dev/sda1",
             "Ebs": {
-              "DeleteOnTermination": "true",
-              "VolumeSize": "50",
+              "DeleteOnTermination": true,
+              "VolumeSize": { "Ref": "RootVolumeSize" },
               "VolumeType": "gp2"
             }
+          },
+		  {
+            "Fn::If": [
+              "CreateAppVolume",
+              {
+                "DeviceName": {
+                  "Fn::If": [
+                    "NotGenFive",
+                    {
+                      "Fn::FindInMap": [
+                         "InstanceTypeCapabilities",
+                         "PreGenFive",
+                         "ExternDeviceName"
+                      ]
+                    },
+                    {
+                      "Fn::FindInMap": [
+                        "InstanceTypeCapabilities",
+                        "IsGenFive",
+                        "ExternDeviceName"
+                      ]
+                    }
+                  ]
+                },
+                "Ebs": {
+                  "DeleteOnTermination": "true",
+                  "VolumeSize": { "Ref": "AppVolumeSize" },
+                  "VolumeType": { "Ref": "AppVolumeType" }
+                }
+              },
+              { "Ref": "AWS::NoValue" }
+            ]
           }
         ],
         "IamInstanceProfile": {
@@ -611,8 +794,91 @@
                      "\n",
                 "    lock-passwd: True\n",
                 "\n",
+				"growpart:\n",
+                "  mode: auto\n",
+                "  devices: [ '/dev/xvda', '/dev/xvda2', '/dev/nvme0n1p2' ]\n",
+                "  ignore_growroot_disabled: false\n",
+                "\n",
+                {
+                  "Fn::If": [
+                    "CreateAppVolume",
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "bootcmd:\n",
+                          "- cloud-init-per instance mkfs-appvolume mkfs -t ext4 ",
+                          {
+                            "Fn::If": [
+                              "NotGenFive",
+                              {
+                                "Fn::FindInMap": [
+                                  "InstanceTypeCapabilities",
+                                  "PreGenFive",
+                                  "InternDeviceName"
+                                ]
+                              },
+                              {
+                                "Fn::FindInMap": [
+                                  "InstanceTypeCapabilities",
+                                  "IsGenFive",
+                                  "InternDeviceName"
+                                ]
+                              }
+                            ]
+                          },
+                          "\n",
+                          "mounts:\n",
+                          "- [ ",
+                          {
+                            "Fn::If": [
+                              "NotGenFive",
+                              {
+                                "Fn::FindInMap": [
+                                  "InstanceTypeCapabilities",
+                                  "PreGenFive",
+                                  "InternDeviceName"
+                                ]
+                              },
+                              {
+                                "Fn::FindInMap": [
+                                  "InstanceTypeCapabilities",
+                                  "IsGenFive",
+                                  "InternDeviceName"
+                                ]
+                              }
+                            ]
+                          },
+                          ", ",
+
+                          { "Ref": "AppVolumeMountPath" },
+                          " ]\n"
+                        ]
+                      ]
+                    },
+                    { "Ref": "AWS::NoValue" }
+                  ]
+                },
+                "\n",
+
                 "runcmd:\n",
                 "  - |-\n",
+		        "      # Extend any available LVM PVs\n",
+                "      if [[ -x $( which pvs ) ]]\n",
+                "      then\n",
+                "        LVMPVS=($(pvs --noheadings -o pv_name))\n",
+                "        for PV in \"${LVMPVS[@]}\"\n",
+                "          do\n",
+                "            pvresize ${PV}\n",
+                "          done\n",
+                "        \n",
+                "        vgdisplay -s\n",
+				"        # Extend the root volume from default 4 GB to 6 GB\n",
+                "        \n",
+                "        lvextend --size +2G --resizefs /dev/VolGroup00/rootVol\n",
+                "        lvscan\n",
+                "      fi\n",
+                "      \n",
                 "      # Export cert bundle ENVs\n",
                 "      export AWS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt\n",
                 "      export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt\n",
@@ -627,27 +893,6 @@
                 "         exit 1\n",
                 "      }\n",
                 "      \n",
-                "      # Add admin SSH keys to the ",
-                       { "Ref": "ProvisionUser" },
-                       " account\n",
-                "      export PROVHOME=/home/",
-                       { "Ref": "ProvisionUser" },
-                       "\n",
-                "      if [[ ! -d ${PROVHOME}/.ssh ]]\n",
-                "      then\n",
-                "         printf \"Waiting for ${PROVHOME}/.ssh to be created\"\n",
-                "         while [[ ! -d ${PROVHOME}/.ssh ]]\n",
-                "         do\n",
-                "            printf \".\"\n",
-                "            sleep 5\n",
-                "         done\n",
-                "         echo \"Found.\"\n",
-                "      fi\n",
-                "      \n",
-                "      curl -skL ",
-                       { "Ref": "AdminPubkeyURL" },
-                       " >> ${PROVHOME}/.ssh/authorized_keys || ",
-                       "err_exit 'Failed to install admin-users keys'\n",
                 "      \n",
                 "      # Install RPMs needed by the cfn-tools.\n",
                 "      yum --enablerepo=",
@@ -666,44 +911,88 @@
                        " /usr/lib/python${PYVERS}/site-packages/cfnbootstrap",
                         "/util.py\n",
                 "      \n",
+                "      # Install GNOME\n",
+                "      yum -y groups install 'GNOME Desktop'\n",
+                "      systemctl set-default graphical.target\n",
+                "      \n",
+                "      # Install VNC server\n",
+                "      yum -y install tigervnc-server\n",
+                "      \n",
+                "      # Generate default VNC server password\n",
+                "      umask 0077\n",
+                "      mkdir -p /home/",
+                       { "Ref": "ProvisionUser" },
+                       "/.vnc\n",
+                "      chmod go-rwx /home/",
+                       { "Ref": "ProvisionUser" },
+                       "/.vnc\n",
+                "      vncpasswd -f <<<",
+                       { "Ref": "VNCServerPasswd" },
+					   " > /home/",
+                       { "Ref": "ProvisionUser" },
+                       "/.vnc/passwd\n",
+				"      chown -R ",
+                       { "Ref": "ProvisionUser" },
+					   ":",
+                       { "Ref": "ProvisionUser" },
+                       " /home/",
+                       { "Ref": "ProvisionUser" },
+                       "/.vnc\n",
+                "      \n",
+                "      # Configure VNC server\n",
+				"      cp /lib/systemd/system/vncserver@.service  /etc/systemd/system/vncserver@:1.service\n",
+				"      sed -i 's/<USER>/",				
+                       { "Ref": "ProvisionUser" },
+                       "/g' /etc/systemd/system/vncserver@:1.service\n",
+				"      systemctl daemon-reload\n",
+				"      systemctl start vncserver@:1\n",
+				"      systemctl enable vncserver@:1\n",
+				"      \n",
+				"      # Addwall VNC server firewall rules\n",
+				"      setenforce 0\n",
+				"      firewall-cmd --add-port=5901/tcp\n",
+				"      firewall-cmd --add-port=5901/tcp --permanent\n",
+				"      setenforce 1\n",
+                "      \n",
                 "      # Execute cfn-init\n",
                 "      /opt/aws/bin/cfn-init -v -c launch",
                        " --stack ",
                        { "Ref": "AWS::StackName" },
                        " --resource Ec2Instance",
-                {
-                  "Fn::If": [
-                    "AssignInstanceRole",
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          " --role ",
-                          { "Ref": "InstanceRole" }
-                        ]
-                      ]
-                    },
-                    ""
-                  ]
-                },
-                {
-                  "Fn::If": [
-                    "UseCfnUrl",
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          " --url ",
-                          { "Ref": "CfnEndpointUrl" }
-                        ]
-                      ]
-                    },
-                    ""
-                  ]
-                },
-                       " --region ",
-                       { "Ref": "AWS::Region" },
-                       " || err_exit echo 'cfn-init FAILED! Aborting!'\n"
+					   {
+					     "Fn::If": [
+					        "AssignInstanceRole",
+					        {
+							  "Fn::Join": [
+								"",
+								[
+								  " --role ",
+								  { "Ref": "InstanceRole" }
+								]
+							  ]
+							},
+							""
+						  ]
+						},
+						{
+						  "Fn::If": [
+							"UseCfnUrl",
+							{
+							  "Fn::Join": [
+								"",
+								[
+								  " --url ",
+								  { "Ref": "CfnEndpointUrl" }
+								]
+							  ]
+							},
+							""
+						  ]
+						},
+                        " --region ",
+                        { "Ref": "AWS::Region" },
+                        " || err_exit echo 'cfn-init FAILED! Aborting!'\n"
+
               ]
             ]
           }
