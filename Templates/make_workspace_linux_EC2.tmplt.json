@@ -15,9 +15,6 @@
       "Fn::Not": [
         { "Fn::Equals": [ { "Ref": "PrivateIp" }, "" ] }
       ]
-    },	
-    "CreateAppVolume": {
-      "Fn::Equals": [ { "Ref": "AppVolumeDevice" }, "true" ]
     },
     "InstallUpdates": {
       "Fn::Not": [
@@ -166,13 +163,11 @@
   },
   "Parameters": {
     "AdminPubkeyURL": {
-      "AllowedPattern": "^$|^http://.*$|^https://.*$",
       "Description": "URL the file containing the admin users' SSH public keys.",
       "Type": "String",
 	  "Default": ""
     },
     "AmiId": {
-      "AllowedPattern": "^ami-[0-9a-z]{8}$|^ami-[0-9a-z]{17}$",
       "Description": "ID of the AMI to launch",
       "Type": "String",
 	  "Default":""
@@ -191,9 +186,9 @@
       "Type": "String"
     },
 	"InstallerUserName": {
-      "AllowedPattern": "^[a-z][a-z0-9_]*[a-z0-9]*$",
-      "Default": "",
+      "Default": "maintuser",
       "Description": "Username to install software.",
+      "ConstraintDescription": "Alphanumeric string between 8 and 32 characters.",
       "MinLength": "8",
       "MaxLength": "32",
       "Type": "String"
@@ -216,7 +211,7 @@
       ],
       "Description": "Amazon EC2 instance type",
       "Type": "String",
-      "Default": ""
+      "Default": "t2.micro"
     },
     "KeyPairName": {
       "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
@@ -261,10 +256,10 @@
       "Type": "String"
     },
     "ProvisionUser": {
-      "AllowedPattern": "[a-z0-9]{6,12}+",
-      "ConstraintDescription": "Alphanumeric string between 6 and 12 characters.",
-      "Default": "",
       "Description": "Default login user account name.",
+      "Default": "maintuser",
+      "MinLength": "8",
+      "MaxLength": "32",
       "Type": "String"
     },
     "PyStache": {
@@ -303,14 +298,14 @@
       ],
       "Description": "Environment in which the instance is being deployed",
       "Type": "String",
-      "Default": ""
+      "Default": "dev"
     },
 	"RootVolumeSize": {
       "ConstraintDescription": "Must be between 20GB and 16384GB.",
       "Default": "30",
       "Description": "Size in GB of the EBS volume to create. If smaller than AMI defaul, create operation will fail; If larger, root device-volume's partition size will be increased",
       "MaxValue": "16384",
-      "MinValue": "",
+      "MinValue": "20",
       "Type": "Number"
     }
   },
@@ -651,38 +646,6 @@
               "VolumeSize": { "Ref": "RootVolumeSize" },
               "VolumeType": "gp2"
             }
-          },
-		  {
-            "Fn::If": [
-              "CreateAppVolume",
-              {
-                "DeviceName": {
-                  "Fn::If": [
-                    "NotGenFive",
-                    {
-                      "Fn::FindInMap": [
-                         "InstanceTypeCapabilities",
-                         "PreGenFive",
-                         "ExternDeviceName"
-                      ]
-                    },
-                    {
-                      "Fn::FindInMap": [
-                        "InstanceTypeCapabilities",
-                        "IsGenFive",
-                        "ExternDeviceName"
-                      ]
-                    }
-                  ]
-                },
-                "Ebs": {
-                  "DeleteOnTermination": "true",
-                  "VolumeSize": { "Ref": "AppVolumeSize" },
-                  "VolumeType": { "Ref": "AppVolumeType" }
-                }
-              },
-              { "Ref": "AWS::NoValue" }
-            ]
           }
         ],
         "IamInstanceProfile": {
