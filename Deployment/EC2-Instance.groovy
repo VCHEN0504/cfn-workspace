@@ -50,6 +50,7 @@ pipeline {
         string(name: 'VNCServerPasswd', defaultValue: '', description: 'Default VNC server password. Password must contain at least one letter, at least one number, and be longer than six characters.')
         string(name: 'WatchmakerConfig', defaultValue: '', description: '(Optional) Path to a Watchmaker config file.  The config file path can be a remote source (i.e. http[s]://, s3://) or local directory (i.e. file://)')
         string(name: 'WatchmakerEnvironment', defaultValue: '', description: 'Environment in which the instance is being deployed')
+        string(name: 'SSHKey', defaultValue: '', description: 'SSH Key')
     }
 
     stages {
@@ -145,6 +146,10 @@ pipeline {
                             {
                                 "ParameterKey": "WatchmakerEnvironment",
                                 "ParameterValue": "${env.WatchmakerEnvironment}"
+                            },
+                            {
+                                "ParameterKey": "SSHKey",
+                                "ParameterValue": "${env.SSHKey}"
                             }
                         ]
                     /
@@ -156,7 +161,7 @@ pipeline {
                 withCredentials(
                     [
                         [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: "${AwsCred}", secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-                        sshUserPrivateKey(credentialsId: "${GitCred}", keyFileVariable: 'SSH_KEY_FILE', passphraseVariable: 'SSH_KEY_PASS', usernameVariable: 'SSH_KEY_USER')
+                        sshUserPrivateKey(credentialsId: "${SSHKey}", keyFileVariable: 'SSH_KEY_FILE', passphraseVariable: 'SSH_KEY_PASS', usernameVariable: 'SSH_KEY_USER')
                     ]
                 ) {
                     sh '''#!/bin/bash
@@ -173,7 +178,7 @@ pipeline {
                 withCredentials(
                     [
                         [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: "${AwsCred}", secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-                        sshUserPrivateKey(credentialsId: "${GitCred}", keyFileVariable: 'SSH_KEY_FILE', passphraseVariable: 'SSH_KEY_PASS', usernameVariable: 'SSH_KEY_USER')
+                        sshUserPrivateKey(credentialsId: "${SSHKey}", keyFileVariable: 'SSH_KEY_FILE', passphraseVariable: 'SSH_KEY_PASS', usernameVariable: 'SSH_KEY_USER')
                     ]
                 ) {
                     sh '''#!/bin/bash
