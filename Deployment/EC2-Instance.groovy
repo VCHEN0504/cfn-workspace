@@ -150,6 +150,7 @@ pipeline {
                     /
                 }
             }
+		}
         stage ('Prepare AWS Environment') {
             steps {
                 withCredentials(
