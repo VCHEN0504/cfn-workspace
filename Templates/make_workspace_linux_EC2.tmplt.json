@@ -116,17 +116,6 @@
             "SecurityGroupIds"
           ]
         },
-		{
-          "Label": {
-            "default": "Workspace Tool EBS Volume"
-          },
-          "Parameters": [
-            "AppVolumeDevice",
-            "AppVolumeMountPath",
-            "AppVolumeSize",
-            "AppVolumeType"
-          ]
-        },
         {
           "Label": {
             "default": "EC2 Watchmaker Configuration"
@@ -180,13 +169,13 @@
       "AllowedPattern": "^$|^http://.*$|^https://.*$",
       "Description": "URL the file containing the admin users' SSH public keys.",
       "Type": "String",
-	  "Default": "https://s3.amazonaws.com/dotc-common/Miscellaneous/AdminKeys.txt"
+	  "Default": ""
     },
     "AmiId": {
       "AllowedPattern": "^ami-[0-9a-z]{8}$|^ami-[0-9a-z]{17}$",
       "Description": "ID of the AMI to launch",
       "Type": "String",
-	  "Default":"ami-0c066bc63147ab6bd"
+	  "Default":""
     },
     "CfnEndpointUrl": {
       "AllowedPattern": "^$|^http[s]?://.*$",
@@ -203,7 +192,7 @@
     },
 	"InstallerUserName": {
       "AllowedPattern": "^[a-z][a-z0-9_]*[a-z0-9]*$",
-      "Default": "maintuser",
+      "Default": "",
       "Description": "Username to install software.",
       "MinLength": "8",
       "MaxLength": "32",
@@ -212,7 +201,7 @@
     "InstanceRole": {
       "Description": "(Optional) IAM instance role to apply to the instance",
       "Type": "String",
-	  "Default": "Workspaces_IAM_Role"
+	  "Default": ""
     },
     "InstanceType": {
       "AllowedValues": [
@@ -227,12 +216,12 @@
       ],
       "Description": "Amazon EC2 instance type",
       "Type": "String",
-      "Default": "t2.large"
+      "Default": ""
     },
     "KeyPairName": {
       "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
       "Type": "AWS::EC2::KeyPair::KeyName",
-	  "Default": "vchen-dev"
+	  "Default": ""
     },
     "NoPublicIp": {
       "AllowedValues": [
@@ -274,7 +263,7 @@
     "ProvisionUser": {
       "AllowedPattern": "[a-z0-9]{6,12}+",
       "ConstraintDescription": "Alphanumeric string between 6 and 12 characters.",
-      "Default": "maintuser",
+      "Default": "",
       "Description": "Default login user account name.",
       "Type": "String"
     },
@@ -286,17 +275,16 @@
     "SecurityGroupIds": {
       "Description": "List of security groups to apply to the instance",
       "Type": "List<AWS::EC2::SecurityGroup::Id>",
-	  "Default": "sg-6bffc618,sg-0cb0810bc85da4547"
+	  "Default": ""
     },
     "SubnetId": {
       "Description": "ID of the subnet to assign to the instance",
       "Type": "AWS::EC2::Subnet::Id",
-	  "Default": "subnet-10cf243d"
+	  "Default": ""
     },
 	"VNCServerPasswd": {
-      "AllowedPattern": "^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{6,}$",
       "ConstraintDescription": "Password must contain at least one letter, at least one number, and be longer than six characters.",
-      "Default": "vnc123",
+      "Default": "",
       "Description": "Default VNC server password",
       "Type": "String"
     },
@@ -315,14 +303,14 @@
       ],
       "Description": "Environment in which the instance is being deployed",
       "Type": "String",
-      "Default": "dev"
+      "Default": ""
     },
 	"RootVolumeSize": {
       "ConstraintDescription": "Must be between 20GB and 16384GB.",
       "Default": "30",
       "Description": "Size in GB of the EBS volume to create. If smaller than AMI defaul, create operation will fail; If larger, root device-volume's partition size will be increased",
       "MaxValue": "16384",
-      "MinValue": "20",
+      "MinValue": "",
       "Type": "Number"
     }
   },
