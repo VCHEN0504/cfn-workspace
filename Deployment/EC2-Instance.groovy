@@ -146,10 +146,6 @@ pipeline {
                             {
                                 "ParameterKey": "WatchmakerEnvironment",
                                 "ParameterValue": "${env.WatchmakerEnvironment}"
-                            },
-                            {
-                                "ParameterKey": "SSHKey",
-                                "ParameterValue": "${env.SSHKey}"
                             }
                         ]
                     /
