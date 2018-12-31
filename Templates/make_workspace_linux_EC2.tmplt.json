@@ -39,7 +39,6 @@
   },
   "Description": "This template deploys a standalone Linux instance to host a Workspace.",
   "Mappings": {
-
   },
   "Metadata": {
     "AWS::CloudFormation::Interface": {
