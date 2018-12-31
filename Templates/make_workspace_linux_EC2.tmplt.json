@@ -268,9 +268,8 @@
       "Type": "String"
     },
     "SecurityGroupIds": {
-      "Description": "List of security groups to apply to the instance",
-      "Type": "List<AWS::EC2::SecurityGroup::Id>",
-	  "Default": "sg-6bffc618,sg-0cb0810bc85da4547"
+      "Description": "List of security groups to apply to the instance.",
+      "Type": "List<AWS::EC2::SecurityGroup::Id>"
     },
     "SubnetId": {
       "Description": "ID of the subnet to assign to the instance",
