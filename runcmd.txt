@@ -1,0 +1,59 @@
+#!/bin/sh
+# Extend any available LVM PVs
+if [[ -x $( which pvs ) ]]
+then
+  LVMPVS=($(pvs --noheadings -o pv_name))
+  for PV in "${LVMPVS[@]}"
+    do
+      pvresize ${PV}
+    done
+
+  vgdisplay -s
+  # Extend the root volume from default 4 GB to 6 GB
+
+  lvextend --size +2G --resizefs /dev/VolGroup00/rootVol
+  lvscan
+fi
+
+# Export cert bundle ENVs
+export AWS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+
+# Error-logging helper-function
+function err_exit {
+   echo "${1}"
+   logger -p kern.crit -t UserData "${1}"
+   /opt/aws/bin/cfn-signal -e 1 --stack vchen-ws-6 --resource Ec2instance
+   exit 1
+}
+
+
+# Install RPMs needed by the cfn-tools.
+yum --enablerepo=epel install -y pystache python2-pip || err_exit 'Could not install Cfn dependencies.'
+
+# Update cfn-bootstrapper hash method
+PYVERS=$(python -c 'import sys; version=sys.version_info[:2]; print("{0}.{1}".format(*version))')
+sed -i '/^[ \t][ \t]*self._etag/s/etag$/None/' /usr/lib/python${PYVERS}/site-packages/cfnbootstrap/util.py
+
+# Install GNOME
+yum -y groups install 'GNOME Desktop'
+systemctl set-default graphical.target
+
+# Install VNC server
+yum -y install tigervnc-server
+
+# (TODO) Generate default VNC server password
+
+# Configure VNC server
+cp /lib/systemd/system/vncserver@.service  /etc/systemd/system/vncserver@:1.service
+sed -i 's/<USER>/maintuser/g' /etc/systemd/system/vncserver@:1.service
+systemctl daemon-reload
+#systemctl start vncserver@:1
+systemctl enable vncserver@:1
+
+# Addwall VNC server firewall rules
+firewall-cmd --add-port=5901/tcp
+firewall-cmd --add-port=5901/tcp --permanent
+
+# Execute cfn-init
+/opt/aws/bin/cfn-init -v -c launch --stack vchen-ws-6 --resource Ec2Instance --role Workspaces_IAM_Role --url https://cloudformation.us-east-1.amazonaws.com --region us-east-1 || err_exit echo 'cfn-init FAILED! Aborting!'

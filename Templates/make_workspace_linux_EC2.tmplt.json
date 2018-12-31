@@ -15,9 +15,6 @@
       "Fn::Not": [
         { "Fn::Equals": [ { "Ref": "PrivateIp" }, "" ] }
       ]
-    },	
-    "CreateAppVolume": {
-      "Fn::Equals": [ { "Ref": "AppVolumeDevice" }, "true" ]
     },
     "InstallUpdates": {
       "Fn::Not": [
@@ -116,17 +113,6 @@
             "SecurityGroupIds"
           ]
         },
-		{
-          "Label": {
-            "default": "Workspace Tool EBS Volume"
-          },
-          "Parameters": [
-            "AppVolumeDevice",
-            "AppVolumeMountPath",
-            "AppVolumeSize",
-            "AppVolumeType"
-          ]
-        },
         {
           "Label": {
             "default": "EC2 Watchmaker Configuration"
@@ -177,16 +163,14 @@
   },
   "Parameters": {
     "AdminPubkeyURL": {
-      "AllowedPattern": "^$|^http://.*$|^https://.*$",
       "Description": "URL the file containing the admin users' SSH public keys.",
       "Type": "String",
 	  "Default": ""
     },
     "AmiId": {
-      "AllowedPattern": "^ami-[0-9a-z]{8}$|^ami-[0-9a-z]{17}$",
       "Description": "ID of the AMI to launch",
       "Type": "String",
-	  "Default":"ami-0c066bc63147ab6bd"
+	  "Default":""
     },
     "CfnEndpointUrl": {
       "AllowedPattern": "^$|^http[s]?://.*$",
@@ -199,6 +183,14 @@
       "ConstraintDescription": "An alphanumeric string that represents the EPEL yum repo's label.",
       "Default": "epel",
       "Description": "Name of network's EPEL repo.",
+      "Type": "String"
+    },
+	"InstallerUserName": {
+      "Default": "maintuser",
+      "Description": "Username to install software.",
+      "ConstraintDescription": "Alphanumeric string between 8 and 32 characters.",
+      "MinLength": "8",
+      "MaxLength": "32",
       "Type": "String"
     },
     "InstanceRole": {
@@ -219,7 +211,7 @@
       ],
       "Description": "Amazon EC2 instance type",
       "Type": "String",
-      "Default": ""
+      "Default": "t2.micro"
     },
     "KeyPairName": {
       "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
@@ -264,16 +256,10 @@
       "Type": "String"
     },
     "ProvisionUser": {
-      "AllowedPattern": "[a-z0-9]{6,12}+",
-      "ConstraintDescription": "Alphanumeric string between 6 and 12 characters.",
-      "Default": "maintuser",
       "Description": "Default login user account name.",
-      "Type": "String"
-    },
-	"VNCServerPasswd": {
-      "ConstraintDescription": "Password must contain at least one letter, at least one number, and be longer than six charaters.",
-      "Default": "",
-      "Description": "Default VNC server password",
+      "Default": "maintuser",
+      "MinLength": "8",
+      "MaxLength": "32",
       "Type": "String"
     },
     "PyStache": {
@@ -282,21 +268,18 @@
       "Type": "String"
     },
     "SecurityGroupIds": {
-      "Description": "List of security groups to apply to the instance",
-      "Type": "List<AWS::EC2::SecurityGroup::Id>",
-	  "Default": ""
+      "Description": "List of security groups to apply to the instance.",
+      "Type": "List<AWS::EC2::SecurityGroup::Id>"
     },
     "SubnetId": {
       "Description": "ID of the subnet to assign to the instance",
       "Type": "AWS::EC2::Subnet::Id",
 	  "Default": ""
     },
-	"InstallerUserName": {
-      "AllowedPattern": "^[a-z][a-z0-9_]*[a-z0-9]*$",
-      "Default": "maintuser",
-      "Description": "Username to install software.",
-      "MinLength": "8",
-      "MaxLength": "32",
+	"VNCServerPasswd": {
+      "ConstraintDescription": "Password must contain at least one letter, at least one number, and be longer than six characters.",
+      "Default": "",
+      "Description": "Default VNC server password",
       "Type": "String"
     },
     "WatchmakerConfig": {
@@ -314,50 +297,15 @@
       ],
       "Description": "Environment in which the instance is being deployed",
       "Type": "String",
-      "Default": ""
+      "Default": "dev"
     },
 	"RootVolumeSize": {
       "ConstraintDescription": "Must be between 20GB and 16384GB.",
-      "Default": "",
+      "Default": "30",
       "Description": "Size in GB of the EBS volume to create. If smaller than AMI defaul, create operation will fail; If larger, root device-volume's partition size will be increased",
       "MaxValue": "16384",
       "MinValue": "20",
       "Type": "Number"
-    },
-	"AppVolumeDevice": {
-      "AllowedValues": [
-        "true",
-        "false"
-      ],
-      "Default": "true",
-      "Description": "Decision on whether to mount an extra EBS volume. Leave as default (\"false\") to launch without an extra application volume",
-      "Type": "String"
-    },
-    "AppVolumeMountPath": {
-      "AllowedPattern": "/.*",
-      "Default": "",
-      "Description": "Filesystem path to mount the extra app volume. Ignored if \"AppVolumeDevice\" is false",
-      "Type": "String"
-    },
-    "AppVolumeSize": {
-      "ConstraintDescription": "Must be between 1GB and 16384GB.",
-      "Default": "",
-      "Description": "Size in GB of the EBS volume to create. Ignored if \"AppVolumeDevice\" is false",
-      "MaxValue": "16384",
-      "MinValue": "1",
-      "Type": "Number"
-    },
-    "AppVolumeType": {
-      "AllowedValues": [
-        "gp2",
-        "io1",
-        "sc1",
-        "st1",
-        "standard"
-      ],
-      "Default": "gp2",
-      "Description": "Type of EBS volume to create. Ignored if \"AppVolumeDevice\" is false",
-      "Type": "String"
     }
   },
   "Resources": {
@@ -697,38 +645,6 @@
               "VolumeSize": { "Ref": "RootVolumeSize" },
               "VolumeType": "gp2"
             }
-          },
-		  {
-            "Fn::If": [
-              "CreateAppVolume",
-              {
-                "DeviceName": {
-                  "Fn::If": [
-                    "NotGenFive",
-                    {
-                      "Fn::FindInMap": [
-                         "InstanceTypeCapabilities",
-                         "PreGenFive",
-                         "ExternDeviceName"
-                      ]
-                    },
-                    {
-                      "Fn::FindInMap": [
-                        "InstanceTypeCapabilities",
-                        "IsGenFive",
-                        "ExternDeviceName"
-                      ]
-                    }
-                  ]
-                },
-                "Ebs": {
-                  "DeleteOnTermination": "true",
-                  "VolumeSize": { "Ref": "AppVolumeSize" },
-                  "VolumeType": { "Ref": "AppVolumeType" }
-                }
-              },
-              { "Ref": "AWS::NoValue" }
-            ]
           }
         ],
         "IamInstanceProfile": {
@@ -799,68 +715,6 @@
                 "  devices: [ '/dev/xvda', '/dev/xvda2', '/dev/nvme0n1p2' ]\n",
                 "  ignore_growroot_disabled: false\n",
                 "\n",
-                {
-                  "Fn::If": [
-                    "CreateAppVolume",
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "bootcmd:\n",
-                          "- cloud-init-per instance mkfs-appvolume mkfs -t ext4 ",
-                          {
-                            "Fn::If": [
-                              "NotGenFive",
-                              {
-                                "Fn::FindInMap": [
-                                  "InstanceTypeCapabilities",
-                                  "PreGenFive",
-                                  "InternDeviceName"
-                                ]
-                              },
-                              {
-                                "Fn::FindInMap": [
-                                  "InstanceTypeCapabilities",
-                                  "IsGenFive",
-                                  "InternDeviceName"
-                                ]
-                              }
-                            ]
-                          },
-                          "\n",
-                          "mounts:\n",
-                          "- [ ",
-                          {
-                            "Fn::If": [
-                              "NotGenFive",
-                              {
-                                "Fn::FindInMap": [
-                                  "InstanceTypeCapabilities",
-                                  "PreGenFive",
-                                  "InternDeviceName"
-                                ]
-                              },
-                              {
-                                "Fn::FindInMap": [
-                                  "InstanceTypeCapabilities",
-                                  "IsGenFive",
-                                  "InternDeviceName"
-                                ]
-                              }
-                            ]
-                          },
-                          ", ",
-
-                          { "Ref": "AppVolumeMountPath" },
-                          " ]\n"
-                        ]
-                      ]
-                    },
-                    { "Ref": "AWS::NoValue" }
-                  ]
-                },
-                "\n",
-
                 "runcmd:\n",
                 "  - |-\n",
 		        "      # Extend any available LVM PVs\n",
