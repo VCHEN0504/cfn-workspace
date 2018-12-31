@@ -16,50 +16,6 @@
         { "Fn::Equals": [ { "Ref": "PrivateIp" }, "" ] }
       ]
     },
-    "InstallUpdates": {
-      "Fn::Not": [
-        { "Fn::Equals": [ { "Ref": "NoUpdates" }, "true" ] }
-      ]
-    },
-	"NotGenFive": {
-      "Fn::Not": [
-        {
-          "Fn::Or": [
-            {
-              "Fn::Equals": [
-                { "Fn::Select": [
-                    "0",
-                    { "Fn::Split": [ ".", { "Ref": "InstanceType" } ] }
-                  ]
-                },
-                "c5"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                { "Fn::Select": [
-                    "0",
-                    { "Fn::Split": [ ".", { "Ref": "InstanceType" } ] }
-                  ]
-                },
-                "m5"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                { "Fn::Select": [
-                    "0",
-                    { "Fn::Split": [ ".", { "Ref": "InstanceType" } ] }
-                  ]
-                },
-                "t3"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-
     "Reboot": {
       "Fn::Not": [
         { "Fn::Equals": [ { "Ref": "NoReboot" }, "true" ] }
@@ -83,16 +39,7 @@
   },
   "Description": "This template deploys a standalone Linux instance to host a Workspace.",
   "Mappings": {
-    "InstanceTypeCapabilities": {
-      "IsGenFive": {
-        "ExternDeviceName": "/dev/xvdf",
-        "InternDeviceName": "/dev/nvme1n1"
-      },
-      "PreGenFive": {
-        "ExternDeviceName": "/dev/xvdf",
-        "InternDeviceName": "/dev/xvdf"
-      }
-    }
+
   },
   "Metadata": {
     "AWS::CloudFormation::Interface": {
@@ -103,13 +50,11 @@
           },
           "Parameters": [
             "AmiId",
-            "AmiDistro",
             "InstanceType",
             "InstanceRole",
             "KeyPairName",
             "NoPublicIp",
             "NoReboot",
-            "NoUpdates",
             "SecurityGroupIds"
           ]
         },
@@ -136,9 +81,7 @@
             "default": "CloudFormation Configuration"
           },
           "Parameters": [
-            "CfnEndpointUrl",
-            "CfnGetPipUrl",
-            "CfnBootstrapUtilsUrl"
+            "CfnEndpointUrl"
           ]
         }
       ],
@@ -169,7 +112,7 @@
     },
     "AmiId": {
       "Description": "ID of the AMI to launch",
-      "Type": "String",
+      "Type": "AWS::EC2::Image::Id",
 	  "Default":""
     },
     "CfnEndpointUrl": {
@@ -234,15 +177,6 @@
       ],
       "Default": "false",
       "Description": "Controls whether to reboot the instance as the last step of cfn-init execution",
-      "Type": "String"
-    },
-    "NoUpdates": {
-      "AllowedValues": [
-        "false",
-        "true"
-      ],
-      "Default": "false",
-      "Description": "Controls whether to run yum update during a stack update (on the initial instance launch, Watchmaker _always_ installs updates)",
       "Type": "String"
     },
     "PipRpm": {
@@ -357,7 +291,8 @@
                       { "Ref": "ProvisionUser" },
                       " -g ",
                       { "Ref": "ProvisionUser" },
-                      " /etc/cfn/files/AdminKeys.pub ${PROVHOME}/.ssh/authorized_keys\n",
+                      " /etc/cfn/files/adminkeys.pub",
+                      " ${PROVHOME}/.ssh/authorized_keys\n",
                       "\n"
                     ]
                   ]
@@ -662,8 +597,8 @@
             "AssociatePublicIpAddress": {
               "Fn::If": [
                 "AssignPublicIp",
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "DeviceIndex": "0",
