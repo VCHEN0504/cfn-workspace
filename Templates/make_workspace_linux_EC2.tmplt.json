@@ -272,7 +272,7 @@
       "Type": "List<AWS::EC2::SecurityGroup::Id>"
     },
     "SubnetId": {
-      "Description": "ID of the subnet to assign to the instance",
+      "Description": "ID of the subnet to assign to the instance.",
       "Type": "AWS::EC2::Subnet::Id",
 	  "Default": ""
     },
