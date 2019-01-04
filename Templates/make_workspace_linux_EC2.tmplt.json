@@ -195,12 +195,15 @@
       "MaxLength": "32",
       "Type": "String"
     },
+<<<<<<< HEAD
     "PypiIndexUrl": {
       "AllowedPattern": "^http[s]?://.*$",
       "Default": "https://pypi.org/simple",
       "Description": "URL to the PyPi Index",
       "Type": "String"
     },
+=======
+>>>>>>> 02351dc583cb453b8df70fc86a388ffec4ed8796
     "PyStache": {
       "Default": "pystache",
       "Description": "Name of preferred pystache RPM.",
@@ -497,6 +500,7 @@
                     "",
                     [
                       "#!/bin/bash\n\n",
+<<<<<<< HEAD
                       "PYPI_URL=",
                       { "Ref": "PypiIndexUrl" },
                       "\n",
@@ -506,6 +510,9 @@
                       " --trusted-host=\"$PYPI_HOST\"",
                       " --allow-all-external",
                       " --upgrade pip setuptools watchmaker\n\n"
+=======
+                      "pip install -i https://pypi.org/simple/ --upgrade pip setuptools watchmaker\n\n"
+>>>>>>> 02351dc583cb453b8df70fc86a388ffec4ed8796
                     ]
                   ]
                 },
