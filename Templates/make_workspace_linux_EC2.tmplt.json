@@ -120,12 +120,6 @@
       "Description": "(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com",
       "Type": "String"
     },
-	"CfnGetPipUrl": {
-		"AllowedPattern": "^http[s]?://.*\.py$",
-		"Default": "https://bootstrap.pypa.io/get-pip.py",
-		"Description": "URL to get-pip.py",
-		"Type": "String"
-	}
     "EpelRepo": {
       "AllowedPattern": "^[a-z][a-z0-9-]*$",
       "ConstraintDescription": "An alphanumeric string that represents the EPEL yum repo's label.",
@@ -499,19 +493,21 @@
               },
               "/etc/cfn/scripts/watchmaker-install.sh": {
                 "content": {
-                  #!/bin/bash
-                  PYPI_URL=${PypiIndexUrl}
-				  "#!/bin/bash\n\n",
-                  "PYPI_URL=",
-                  { "Ref": "PypiIndexUrl" },
-                  "\n",
-
-                  "# Setup terminal support for UTF-8\n",
-                  "export LC_ALL=en_US.UTF-8\n",
-                  "export LANG=en_US.UTF-8\n",
-                  "curl --silent --show-error --retry 5 -L ${CfnGetPipUrl} | python3 - --index-url=\"$PYPI_URL\"\n",
-                  "pip install --index-url=\"$PYPI_URL\" --upgrade pip setuptools boto3\n",
-                  "pip install --index-url=\"$PYPI_URL\" --upgrade watchmaker\n",
+                  "Fn::Join": [
+                    "",
+                    [
+                      "#!/bin/bash\n\n",
+                      "PYPI_URL=",
+                      { "Ref": "PypiIndexUrl" },
+                      "\n",
+                      "PYPI_HOST=$(echo $PYPI_URL |sed -e \"s/[^/]*\\/\\/\\([^@]*@\\)\\?\\([^:/]*\\).*/\\2/\")\n",
+                      "pip install",
+                      " --index-url=\"$PYPI_URL\"",
+                      " --trusted-host=\"$PYPI_HOST\"",
+                      " --allow-all-external",
+                      " --upgrade pip setuptools watchmaker\n\n"
+                    ]
+                  ]
                 },
                 "group": "root",
                 "mode": "000700",

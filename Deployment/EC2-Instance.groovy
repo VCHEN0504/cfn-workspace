@@ -149,7 +149,7 @@ pipeline {
                             }
                         ]
                     /
-                }
+                
             }
 		}
         stage ('Prepare AWS Environment') {
