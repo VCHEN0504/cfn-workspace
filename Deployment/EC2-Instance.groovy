@@ -39,7 +39,6 @@ pipeline {
         string(name: 'KeyPairName', description: 'Public/private key pair used to allow an operator to securely connect to instance immediately after the instance-SSHD comes online')
         string(name: 'NoPublicIp', defaultValue: 'true', description: 'Controls whether to assign the instance a public IP. Recommended to leave at \'true\' _unless_ launching in a public subnet')
         string(name: 'NoReboot', defaultValue: 'false', description: 'Controls whether to reboot the instance as the last step of cfn-init execution')
-        string(name: 'NoUpdates', defaultValue: 'false', description: 'Controls whether to run yum update during a stack update (on the initial instance launch, Watchmaker _always_ installs updates)')
         string(name: 'PipRpm', defaultValue: 'python2-pip', description: 'Name of preferred pip RPM.')
         string(name: 'PrivateIp', defaultValue: '', description: '(Optional) Set a static, primary private IP. Leave blank to auto-select a free IP')
         string(name: 'ProvisionUser', defaultValue: '', description: 'Name for remote-administration account')
@@ -102,10 +101,6 @@ pipeline {
                             {
                                 "ParameterKey": "NoReboot",
                                 "ParameterValue": "${env.NoReboot}"
-                            },
-                            {
-                                "ParameterKey": "NoUpdates",
-                                "ParameterValue": "${env.NoUpdates}"
                             },
                             {
                                 "ParameterKey": "PipRpm",
