@@ -33,6 +33,7 @@ pipeline {
         string(name: 'AmiId', description: 'ID of the AMI to launch')
         string(name: 'CfnEndpointUrl', defaultValue: 'https://cloudformation.us-east-1.amazonaws.com', description: '(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com')
         string(name: 'EpelRepo', defaultValue: 'epel', description: 'Name of network-available EPEL repo.')
+        string(name: 'InitScriptURL', description: '(Optional) URL of file containing tasks to be run during EC2 instantiation')
         string(name: 'InstallerUserName', defaultValue: '', description: 'Username to install software.')
         string(name: 'InstanceRole', defaultValue: '', description: '(Optional) IAM instance role to apply to the instance')
         string(name: 'InstanceType', defaultValue: '', description: 'Amazon EC2 instance type')
@@ -77,6 +78,10 @@ pipeline {
                             {
                                 "ParameterKey": "EpelRepo",
                                 "ParameterValue": "${env.EpelRepo}"
+                            },
+                            {
+                                "ParameterKey": "InitScriptURL",
+                                "ParameterValue": "${env.InitScriptURL}"
                             },
                             {
                                 "ParameterKey": "InstallerUserName",

@@ -105,7 +105,7 @@
   },
   "Parameters": {
     "AdminPubkeyURL": {
-      "Description": "URL the file containing the admin users' SSH public keys.",
+      "Description": "URL of the file containing the admin users' SSH public keys.",
       "Type": "String",
 	  "Default": ""
     },
@@ -126,6 +126,11 @@
       "Default": "epel",
       "Description": "Name of network's EPEL repo.",
       "Type": "String"
+    },
+    "InitScriptURL": {
+      "Description": "URL of the file containing the tasks to run during EC2 instantiation.",
+      "Type": "String",
+	  "Default": ""
     },
 	"InstallerUserName": {
       "Default": "maintuser",
@@ -195,15 +200,12 @@
       "MaxLength": "32",
       "Type": "String"
     },
-<<<<<<< HEAD
     "PypiIndexUrl": {
       "AllowedPattern": "^http[s]?://.*$",
       "Default": "https://pypi.org/simple",
       "Description": "URL to the PyPi Index",
       "Type": "String"
     },
-=======
->>>>>>> 02351dc583cb453b8df70fc86a388ffec4ed8796
     "PyStache": {
       "Default": "pystache",
       "Description": "Name of preferred pystache RPM.",
@@ -307,6 +309,12 @@
                 },
                 "group": "root",
                 "mode": "000700",
+                "owner": "root"
+              },
+              "/etc/cfn/files/ws-init.sh": {
+                "source": { "Ref": "InitScriptURL" },
+                "group": "root",
+                "mode": "000600",
                 "owner": "root"
               }
             }
@@ -716,49 +724,8 @@
                        " /usr/lib/python${PYVERS}/site-packages/cfnbootstrap",
                         "/util.py\n",
                 "      \n",
-                "      # Install GNOME\n",
-                "      yum -y groups install 'GNOME Desktop'\n",
-                "      systemctl set-default graphical.target\n",
-                "      \n",
-                "      # Install VNC server\n",
-                "      yum -y install tigervnc-server\n",
-                "      \n",
-                "      # Generate default VNC server password\n",
-                "      umask 0077\n",
-                "      mkdir -p /home/",
-                       { "Ref": "ProvisionUser" },
-                       "/.vnc\n",
-                "      chmod go-rwx /home/",
-                       { "Ref": "ProvisionUser" },
-                       "/.vnc\n",
-                "      vncpasswd -f <<<",
-                       { "Ref": "VNCServerPasswd" },
-					   " > /home/",
-                       { "Ref": "ProvisionUser" },
-                       "/.vnc/passwd\n",
-				"      chown -R ",
-                       { "Ref": "ProvisionUser" },
-					   ":",
-                       { "Ref": "ProvisionUser" },
-                       " /home/",
-                       { "Ref": "ProvisionUser" },
-                       "/.vnc\n",
-                "      \n",
-                "      # Configure VNC server\n",
-				"      cp /lib/systemd/system/vncserver@.service  /etc/systemd/system/vncserver@:1.service\n",
-				"      sed -i 's/<USER>/",				
-                       { "Ref": "ProvisionUser" },
-                       "/g' /etc/systemd/system/vncserver@:1.service\n",
-				"      systemctl daemon-reload\n",
-				"      systemctl start vncserver@:1\n",
-				"      systemctl enable vncserver@:1\n",
-				"      \n",
-				"      # Addwall VNC server firewall rules\n",
-				"      setenforce 0\n",
-				"      firewall-cmd --add-port=5901/tcp\n",
-				"      firewall-cmd --add-port=5901/tcp --permanent\n",
-				"      setenforce 1\n",
-                "      \n",
+                "      # Execute workpsaces init script\n",
+                "      /etc/cfn/scripts/ws-init.sh",
                 "      # Execute cfn-init\n",
                 "      /opt/aws/bin/cfn-init -v -c launch",
                        " --stack ",
