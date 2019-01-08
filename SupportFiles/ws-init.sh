@@ -9,14 +9,14 @@ yum -y install tigervnc-server
 
 # Generate default VNC server password
 umask 0077
-mkdir -p /home/maintuser/.vnc
-chmod go-rwx /home/maintuser/.vnc
-vncpasswd -f <<<vnc123 > /home/maintuser/.vnc/passwd
-chown -R maintuser:maintuser /home/maintuser/.vnc
+mkdir -p /home/<ProvisionUser>/.vnc
+chmod go-rwx /home/<ProvisionUser>/.vnc
+vncpasswd -f <<<<VNCServerPasswd>> /home/<ProvisionUser>/.vnc/passwd
+chown -R <ProvisionUser>:<ProvisionUser> /home/<ProvisionUser>/.vnc
 
 # Configure VNC server
 cp /lib/systemd/system/vncserver@.service  /etc/systemd/system/vncserver@:1.service
-sed -i 's/<USER>/maintuser/g' /etc/systemd/system/vncserver@:1.service
+sed -i 's/<USER>/<ProvisionUser>/g' /etc/systemd/system/vncserver@:1.service
 systemctl daemon-reload
 systemctl start vncserver@:1
 systemctl enable vncserver@:1

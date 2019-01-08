@@ -274,49 +274,10 @@
           ]
         },
         "AWS::CloudFormation::Init": {
-		  "admkey-install": {
-            "commands": {
-              "1-install-keyfile": {
-                "command": "bash -xe /etc/cfn/scripts/admkey.sh"
-              }
-            },
-            "files": {
-              "/etc/cfn/files/AdminKeys.pub": {
-                "source": { "Ref": "AdminPubkeyURL" },
-                "group": "root",
-                "mode": "000600",
-                "owner": "root",				
-				"authentication": "Ec2IamRole"
-              },
-              "/etc/cfn/scripts/admkey.sh": {
-                "content": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "#!/bin/bash\n\n",
-                      "PROVHOME=$(getent passwd ",
-                      { "Ref": "ProvisionUser" },
-                      " | awk -F\":\" '{print $6}')\n",
-                      "\n",
-                      "install -b -m 000600 -o ",
-                      { "Ref": "ProvisionUser" },
-                      " -g ",
-                      { "Ref": "ProvisionUser" },
-                      " /etc/cfn/files/adminkeys.pub",
-                      " ${PROVHOME}/.ssh/authorized_keys\n",
-                      "\n"
-                    ]
-                  ]
-                },
-                "group": "root",
-                "mode": "000700",
-                "owner": "root"
-              }
-            }
-          },
           "configSets": {
             "launch": [
               "setup",
+			  "admkey-install",
               "watchmaker-install",
               "watchmaker-launch",			  
               "gui-install",
@@ -521,13 +482,43 @@
                 "owner": "root"
               },
 			  "/etc/cfn/scripts/ws-init.sh": {
-                "source": "https://s3.amazonaws.com/vchen-dev-bucket/ws-init.sh",
+                "source": { "Ref": "InitScriptURL" },
                 "group": "root",
                 "mode": "000700",
                 "owner": "root",
 				"authentication": "Ec2IamRole"
+              },
+			  "/etc/cfn/files/adminkeys.pub": {
+                "source": { "Ref": "AdminPubkeyURL" },
+                "group": "root",
+                "mode": "000600",
+                "owner": "root",				
+				"authentication": "Ec2IamRole"
+              },
+              "/etc/cfn/scripts/admkey.sh": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "#!/bin/bash\n\n",
+                      "PROVHOME=$(getent passwd ",
+                      { "Ref": "ProvisionUser" },
+                      " | awk -F\":\" '{print $6}')\n",
+                      "\n",
+                      "install -b -m 000600 -o ",
+                      { "Ref": "ProvisionUser" },
+                      " -g ",
+                      { "Ref": "ProvisionUser" },
+                      " /etc/cfn/files/adminkeys.pub",
+                      " ${PROVHOME}/.ssh/authorized_keys\n",
+                      "\n"
+                    ]
+                  ]
+                },
+                "group": "root",
+                "mode": "000700",
+                "owner": "root"
               }
-
             },
             "services": {
               "sysvinit": {
@@ -541,6 +532,13 @@
                 }
               }
             }
+          },
+		  "admkey-install": {
+            "commands": {
+              "1-install-keyfile": {
+                "command": "bash -xe /etc/cfn/scripts/admkey.sh"
+              }
+			}
           },
           "watchmaker-install": {
             "commands": {
@@ -599,7 +597,13 @@
           },
           "gui-install": {
             "commands": {
-              "10-gui-install": {
+              "1-replace": {
+                "command": { "Fn::Join" : [ "", [ "sed -i 's/<ProvisionUser>/", { "Ref" : "ProvisionUser" },  "/g' /etc/cfn/scripts/ws-init.sh" ] ] }
+              },
+              "2-replace": {
+                 "command": { "Fn::Join" : [ "", [ "sed -i 's/<VNCServerPasswd>/", { "Ref" : "VNCServerPasswd" },  "/g' /etc/cfn/scripts/ws-init.sh" ] ] }
+              },
+              "3-gui-install": {
                 "command": "bash -xe /etc/cfn/scripts/ws-init.sh"
               }
             }
