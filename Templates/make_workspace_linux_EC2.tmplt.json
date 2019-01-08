@@ -285,10 +285,11 @@
                 "source": { "Ref": "AdminPubkeyURL" },
                 "group": "root",
                 "mode": "000600",
-                "owner": "root"
+                "owner": "root",				
+				"authentication": "Ec2IamRole"
               },
               "/etc/cfn/scripts/admkey.sh": {
-              "content": {
+                "content": {
                   "Fn::Join": [
                     "",
                     [
@@ -310,12 +311,6 @@
                 "group": "root",
                 "mode": "000700",
                 "owner": "root"
-              },
-              "/etc/cfn/files/ws-init.sh": {
-                "source": { "Ref": "InitScriptURL" },
-                "group": "root",
-                "mode": "000600",
-                "owner": "root"
               }
             }
           },
@@ -324,6 +319,7 @@
               "setup",
               "watchmaker-install",
               "watchmaker-launch",			  
+              "gui-install",
               "finalize",
               {
                 "Fn::If": [
@@ -523,7 +519,15 @@
                 "group": "root",
                 "mode": "000700",
                 "owner": "root"
+              },
+			  "/etc/cfn/scripts/ws-init.sh": {
+                "source": "https://s3.amazonaws.com/vchen-dev-bucket/ws-init.sh",
+                "group": "root",
+                "mode": "000700",
+                "owner": "root",
+				"authentication": "Ec2IamRole"
               }
+
             },
             "services": {
               "sysvinit": {
@@ -590,6 +594,13 @@
                     ]
                   ]
                 }
+              }
+            }
+          },
+          "gui-install": {
+            "commands": {
+              "10-gui-install": {
+                "command": "bash -xe /etc/cfn/scripts/ws-init.sh"
               }
             }
           }
@@ -724,8 +735,6 @@
                        " /usr/lib/python${PYVERS}/site-packages/cfnbootstrap",
                         "/util.py\n",
                 "      \n",
-                "      # Execute workpsaces init script\n",
-                "      /etc/cfn/scripts/ws-init.sh",
                 "      # Execute cfn-init\n",
                 "      /opt/aws/bin/cfn-init -v -c launch",
                        " --stack ",

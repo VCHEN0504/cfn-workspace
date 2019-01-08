@@ -1,5 +1,12 @@
 #!/bin/bash
-	 
+
+# Install GNOME
+yum -y groups install 'GNOME Desktop'
+systemctl set-default graphical.target
+
+# Install VNC server
+yum -y install tigervnc-server
+
 # Generate default VNC server password
 umask 0077
 mkdir -p /home/maintuser/.vnc
