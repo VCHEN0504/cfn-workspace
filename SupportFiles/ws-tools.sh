@@ -29,8 +29,10 @@ firewall-cmd --add-port=5901/tcp
 firewall-cmd --add-port=5901/tcp --permanent
 setenforce 1
 
-# Download tools from s3 to local folder
-aws s3 sync ToolsURL /etc/cfn/tools 
+# Unzip the tools.tar.gz
+cd /etc/cfn/tools
+gunzip tools.tar.gz
+tar -xvf  tools.tar
 
 # Install ATOM
 # Launch it from your terminal by running the command "atom"

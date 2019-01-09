@@ -221,7 +221,7 @@
 	  "Default": ""
     },
     "ToolsURL": {
-      "Description": "URL of the S3 bucket/folder where stores the binary files to be installed on the EC2.",
+      "Description": "S3 URL of the archive file (in tar.gz format) where contains the binary files to be installed on the EC2.",
       "Type": "String",
 	  "Default": ""
     },	
@@ -493,6 +493,13 @@
                 "owner": "root",
 				"authentication": "Ec2IamRole"
               },
+			  "/etc/cfn/tools/tools.tar.gz": {
+                "source": { "Ref": "ToolsURL" },
+                "group": "root",
+                "mode": "000700",
+                "owner": "root",
+				"authentication": "Ec2IamRole"
+              },
 			  "/etc/cfn/files/adminkeys.pub": {
                 "source": { "Ref": "AdminPubkeyURL" },
                 "group": "root",
@@ -608,10 +615,7 @@
               "2-replace": {
                  "command": { "Fn::Join" : [ "", [ "sed -i 's/VNCServerPasswd/", { "Ref" : "VNCServerPasswd" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
               },
-              "3-replace": {
-                 "command": { "Fn::Join" : [ "", [ "sed -i 's/ToolsURL/", { "Ref" : "ToolsURL" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
-              },
-              "4-tools-install": {
+              "3-tools-install": {
                 "command": "bash -xe /etc/cfn/scripts/ws-tools.sh"
               }
             }

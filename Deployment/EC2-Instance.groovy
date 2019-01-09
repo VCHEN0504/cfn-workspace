@@ -47,7 +47,7 @@ pipeline {
         string(name: 'RootVolumeSize', defaultValue: '20', description: 'Size in GB of the EBS volume to create. If smaller than AMI default, create operation will fail; If larger, partition containing root device-volumes will be upsized')
         string(name: 'SecurityGroupIds', description: 'List of security groups to apply to the instance')
         string(name: 'SubnetId', description: 'ID of the subnet to assign to the instance')
-        string(name: 'ToolsURL', description: 'URL of the S3 bucket/folder where stores the binary files to be installed on the EC2.')
+        string(name: 'ToolsURL', description: 'S3 URL of the archive file (in tar.gz format) where contains the binary files to be installed on the EC2.')
         string(name: 'VNCServerPasswd', defaultValue: '', description: 'Default VNC server password. Password must contain at least one letter, at least one number, and be longer than six characters.')
         string(name: 'WatchmakerConfig', defaultValue: '', description: '(Optional) Path to a Watchmaker config file.  The config file path can be a remote source (i.e. http[s]://, s3://) or local directory (i.e. file://)')
         string(name: 'WatchmakerEnvironment', defaultValue: '', description: 'Environment in which the instance is being deployed')
