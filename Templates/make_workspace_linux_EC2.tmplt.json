@@ -598,10 +598,10 @@
           "gui-install": {
             "commands": {
               "1-replace": {
-                "command": { "Fn::Join" : [ "", [ "sed -i 's/<ProvisionUser>/", { "Ref" : "ProvisionUser" },  "/g' /etc/cfn/scripts/ws-init.sh" ] ] }
+                "command": { "Fn::Join" : [ "", [ "sed -i 's/ProvisionUser/", { "Ref" : "ProvisionUser" },  "/g' /etc/cfn/scripts/ws-init.sh" ] ] }
               },
               "2-replace": {
-                 "command": { "Fn::Join" : [ "", [ "sed -i 's/<VNCServerPasswd>/", { "Ref" : "VNCServerPasswd" },  "/g' /etc/cfn/scripts/ws-init.sh" ] ] }
+                 "command": { "Fn::Join" : [ "", [ "sed -i 's/VNCServerPasswd/", { "Ref" : "VNCServerPasswd" },  "/g' /etc/cfn/scripts/ws-init.sh" ] ] }
               },
               "3-gui-install": {
                 "command": "bash -xe /etc/cfn/scripts/ws-init.sh"
