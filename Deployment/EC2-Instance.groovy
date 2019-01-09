@@ -33,7 +33,7 @@ pipeline {
         string(name: 'AmiId', description: 'ID of the AMI to launch')
         string(name: 'CfnEndpointUrl', defaultValue: 'https://cloudformation.us-east-1.amazonaws.com', description: '(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com')
         string(name: 'EpelRepo', defaultValue: 'epel', description: 'Name of network-available EPEL repo.')
-        string(name: 'InitScriptURL', description: '(Optional) URL of file containing tasks to be run during EC2 instantiation')
+        string(name: 'InstallToolScriptURL', description: 'S3 URL of the script which executes commands to install various tools.')
         string(name: 'InstallerUserName', defaultValue: '', description: 'Username to install software.')
         string(name: 'InstanceRole', defaultValue: '', description: '(Optional) IAM instance role to apply to the instance')
         string(name: 'InstanceType', defaultValue: '', description: 'Amazon EC2 instance type')
@@ -47,6 +47,7 @@ pipeline {
         string(name: 'RootVolumeSize', defaultValue: '20', description: 'Size in GB of the EBS volume to create. If smaller than AMI default, create operation will fail; If larger, partition containing root device-volumes will be upsized')
         string(name: 'SecurityGroupIds', description: 'List of security groups to apply to the instance')
         string(name: 'SubnetId', description: 'ID of the subnet to assign to the instance')
+        string(name: 'ToolsURL', description: 'URL of the S3 bucket/folder where stores the binary files to be installed on the EC2.')
         string(name: 'VNCServerPasswd', defaultValue: '', description: 'Default VNC server password. Password must contain at least one letter, at least one number, and be longer than six characters.')
         string(name: 'WatchmakerConfig', defaultValue: '', description: '(Optional) Path to a Watchmaker config file.  The config file path can be a remote source (i.e. http[s]://, s3://) or local directory (i.e. file://)')
         string(name: 'WatchmakerEnvironment', defaultValue: '', description: 'Environment in which the instance is being deployed')
@@ -80,8 +81,8 @@ pipeline {
                                 "ParameterValue": "${env.EpelRepo}"
                             },
                             {
-                                "ParameterKey": "InitScriptURL",
-                                "ParameterValue": "${env.InitScriptURL}"
+                                "ParameterKey": "InstallToolScriptURL",
+                                "ParameterValue": "${env.InstallToolScriptURL}"
                             },
                             {
                                 "ParameterKey": "InstallerUserName",
@@ -134,6 +135,10 @@ pipeline {
                             {
                                 "ParameterKey": "SubnetId",
                                 "ParameterValue": "${env.SubnetId}"
+                            },
+                            {
+                                "ParameterKey": "ToolsURL",
+                                "ParameterValue": "${env.ToolsURL}"
                             },
                             {
                                 "ParameterKey": "VNCServerPasswd",
