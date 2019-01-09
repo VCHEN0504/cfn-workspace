@@ -127,8 +127,8 @@
       "Description": "Name of network's EPEL repo.",
       "Type": "String"
     },
-    "InitScriptURL": {
-      "Description": "URL of the file containing the tasks to run during EC2 instantiation.",
+    "InstallToolScriptURL": {
+      "Description": "S3 URL of the script which executes commands to install various tools.",
       "Type": "String",
 	  "Default": ""
     },
@@ -220,6 +220,11 @@
       "Type": "AWS::EC2::Subnet::Id",
 	  "Default": ""
     },
+    "ToolsURL": {
+      "Description": "URL of the S3 bucket/folder where stores the binary files to be installed on the EC2.",
+      "Type": "String",
+	  "Default": ""
+    },	
 	"VNCServerPasswd": {
       "ConstraintDescription": "Password must contain at least one letter, at least one number, and be longer than six characters.",
       "Default": "",
@@ -279,8 +284,8 @@
               "setup",
 			  "admkey-install",
               "watchmaker-install",
-              "watchmaker-launch",			  
-              "gui-install",
+              "watchmaker-launch",	  			  
+              "tools-install",
               "finalize",
               {
                 "Fn::If": [
@@ -481,8 +486,8 @@
                 "mode": "000700",
                 "owner": "root"
               },
-			  "/etc/cfn/scripts/ws-init.sh": {
-                "source": { "Ref": "InitScriptURL" },
+			  "/etc/cfn/scripts/ws-tools.sh": {
+                "source": { "Ref": "InstallToolScriptURL" },
                 "group": "root",
                 "mode": "000700",
                 "owner": "root",
@@ -595,20 +600,23 @@
               }
             }
           },
-          "gui-install": {
+          "tools-install": {		  
             "commands": {
               "1-replace": {
-                "command": { "Fn::Join" : [ "", [ "sed -i 's/ProvisionUser/", { "Ref" : "ProvisionUser" },  "/g' /etc/cfn/scripts/ws-init.sh" ] ] }
+                "command": { "Fn::Join" : [ "", [ "sed -i 's/ProvisionUser/", { "Ref" : "ProvisionUser" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
               },
               "2-replace": {
-                 "command": { "Fn::Join" : [ "", [ "sed -i 's/VNCServerPasswd/", { "Ref" : "VNCServerPasswd" },  "/g' /etc/cfn/scripts/ws-init.sh" ] ] }
+                 "command": { "Fn::Join" : [ "", [ "sed -i 's/VNCServerPasswd/", { "Ref" : "VNCServerPasswd" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
               },
-              "3-gui-install": {
-                "command": "bash -xe /etc/cfn/scripts/ws-init.sh"
+              "3-replace": {
+                 "command": { "Fn::Join" : [ "", [ "sed -i 's/ToolsURL/", { "Ref" : "ToolsURL" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
+              },
+              "4-tools-install": {
+                "command": "bash -xe /etc/cfn/scripts/ws-tools.sh"
               }
             }
           }
-        }
+		}
       },
       "Properties": {
         "BlockDeviceMappings": [
