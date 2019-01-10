@@ -262,7 +262,7 @@
       "CreationPolicy": {
         "ResourceSignal": {
           "Count": "1",
-          "Timeout": "PT60M"
+          "Timeout": "PT30M"
         }
       },
       "Metadata": {
@@ -610,12 +610,15 @@
           "tools-install": {		  
             "commands": {
               "1-replace": {
-                "command": { "Fn::Join" : [ "", [ "sed -i 's/ProvisionUser/", { "Ref" : "ProvisionUser" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
+                "command": { "Fn::Join" : [ "", [ "sed -i 's/StackName/", { "Ref": "AWS::StackName" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
               },
               "2-replace": {
+                "command": { "Fn::Join" : [ "", [ "sed -i 's/ProvisionUser/", { "Ref" : "ProvisionUser" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
+              },
+              "3-replace": {
                  "command": { "Fn::Join" : [ "", [ "sed -i 's/VNCServerPasswd/", { "Ref" : "VNCServerPasswd" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
               },
-              "3-tools-install": {
+              "4-tools-install": {
                 "command": "bash -xe /etc/cfn/scripts/ws-tools.sh"
               }
             }
@@ -715,7 +718,7 @@
                 "        vgdisplay -s\n",
 				"        # Extend the root volume from default 4 GB to 6 GB\n",
                 "        \n",
-                "        lvextend --size +2G --resizefs /dev/VolGroup00/rootVol\n",
+                "        lvextend --size +10G --resizefs /dev/VolGroup00/rootVol\n",
                 "        lvscan\n",
                 "      fi\n",
                 "      \n",
