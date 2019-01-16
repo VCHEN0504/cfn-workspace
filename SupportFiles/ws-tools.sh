@@ -103,7 +103,23 @@ ln -s /opt/pycharm-community-2018.3.3/bin/pycharm.sh /usr/local/bin/pycharm
 cp /etc/cfn/tools/pycharm/pycharm.desktop /usr/share/applications/pycharm.desktop
 cp /etc/cfn/tools/pycharm/pycharm.desktop /home/maintuser/.local/share/applications/pycharm.desktop
 chown maintuser:maintuser /home/maintuser/.local/share/applications/pycharm.desktop
-chmod 600 /home/maintuser/.local/share/applications/pycharm.desktop                                                       
+chmod 600 /home/maintuser/.local/share/applications/pycharm.desktop     
+
+# Install MySQL and MySQL Workbench
+# The "proj" libary is required by mysql-workbench but missing from the epel-release-7-11.
+# Therefore, remove epel-release-7-11; and install epel-release-6-8.  We will remove epel-release-6-8
+# and re-install epel-release-7-11 later
+rpm -e epel-release-7-11.noarch
+rpm -Uvh /etc/cfn/tools/mysql/epel-release-6-8.noarch.rpm
+yum -y install proj
+
+rpm -Uvh /etc/cfn/tools/mysql/mysql80-community-release-el7-1.noarch.rpm 
+yum -y install mysql-server || err_exit "Failed to install mysql-server"
+yum -y install mysql-workbench-community || err_exit "Failed to install mysql-workbench"
+
+rpm -Uvh /etc/cfn/tools/mysql/epel-release-7-11.noarch.rpm
+
+                                                  
 
 #cp /etc/cfn/tools/gradle/gradle.sh  /etc/profile.d/gradle.sh
 #chmod 755 /etc/profile.d/gradle.sh
