@@ -148,9 +148,15 @@ chown -R apache:apache /var/www/html/
 chmod -R 775 /var/www/html/
 systemctl restart httpd
 
+setenforce 0
 firewall-cmd --permanent --add-service=http
 firewall-cmd --permanent --add-service=https
-firewall-cmd --reload
+#firewall-cmd --reload
+setenforce 1
 
+# Install Qt Assistant and creator
+rpm -Uvh /etc/cfn/tools/qt/qt-assistant-4.8.7-2.el7.x86_64.rpm 
+yum -y install qt-assistant || err_exit "Failed to install qt-assistant"
+yum -y install qt-creator || err_exit "Failed to install qt-creator"
 
 # (TODO) Remove rpm files
