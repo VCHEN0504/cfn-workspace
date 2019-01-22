@@ -118,7 +118,6 @@ yum -y install code || err_exit "Failed to install code"
 rpm -Uvh /etc/cfn/tools/mongo/mongodb-org-shell-4.0.5-1.el7.x86_64.rpm  
 sudo yum install -y mongodb-org-shell || err_exit "Failed to install mongodb-org-shell"       
 
-
 # Install MySQL and MySQL Workbench
 # The "proj" libary is required by mysql-workbench but missing from the epel-release-7-11.
 # Therefore, remove epel-release-7-11; and install epel-release-6-8.  We will remove epel-release-6-8
@@ -148,9 +147,16 @@ chown -R apache:apache /var/www/html/
 chmod -R 775 /var/www/html/
 systemctl restart httpd
 
+setenforce 0
 firewall-cmd --permanent --add-service=http
 firewall-cmd --permanent --add-service=https
 firewall-cmd --reload
+setenforce 1
+
+# Install Qt Assistant and creator
+rpm -Uvh /etc/cfn/tools/qt/qt-assistant-4.8.7-2.el7.x86_64.rpm 
+yum -y install qt-creator || err_exit "Failed to install qt-creator"
+yum -y install qt-assistant || err_exit "Failed to install qt-assistant"
 
 
 # (TODO) Remove rpm files
