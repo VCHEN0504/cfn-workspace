@@ -154,7 +154,7 @@ firewall-cmd --reload
 setenforce 1
 
 # Install Qt Assistant and creator
-rpm -Uvh /etc/cfn/tools/qt/qt-assistant-4.8.7-2.el7.x86_64.rpm 
+#rpm -Uvh /etc/cfn/tools/qt/qt-assistant-4.8.7-2.el7.x86_64.rpm 
 yum -y install qt-creator || err_exit "Failed to install qt-creator"
 yum -y install qt-assistant || err_exit "Failed to install qt-assistant"
 
