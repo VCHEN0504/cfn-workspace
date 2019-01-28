@@ -40,13 +40,13 @@ setenforce 1
 tar xfz /etc/cfn/tools/tools.tar.gz -C /etc/cfn/tools || err_exit "Failed to unzip tools.tar.gz"
 
 # Install Anaconda
-bash /etc/cfn/tools/anaconda/anaconda.sh -b -p /home/maintuser/anaconda3
-chown -R maintuser:maintuser /home/maintuser/anaconda3
+bash /etc/cfn/tools/anaconda/anaconda.sh -b -p /home/WorkstationUser/anaconda3
+chown -R WorkstationUser:WorkstationUser /home/WorkstationUser/anaconda3
 
 cp /etc/cfn/tools/anaconda/anaconda.desktop /usr/share/applications/anaconda.desktop
-cp /etc/cfn/tools/anaconda/anaconda.desktop /home/maintuser/.local/share/applications/anaconda.desktop
-chown maintuser:maintuser /home/maintuser/.local/share/applications/anaconda.desktop
-chmod 600 /home/maintuser/.local/share/applications/anaconda.desktop
+cp /etc/cfn/tools/anaconda/anaconda.desktop /home/WorkstationUser/.local/share/applications/anaconda.desktop
+chown WorkstationUser:WorkstationUser /home/WorkstationUser/.local/share/applications/anaconda.desktop
+chmod 600 /home/WorkstationUser/.local/share/applications/anaconda.desktop
 
 # Install ATOM
 # Launch it from your terminal by running the command "atom"
@@ -57,9 +57,9 @@ tar xfz /etc/cfn/tools/eclipse/eclipse-jee-neon-3-linux-gtk-x86_64.tar.gz -C /op
 ln -s /opt/eclipse/eclipse /usr/local/bin/eclipse
 
 cp /etc/cfn/tools/eclipse/eclipse.desktop /usr/share/applications/eclipse.desktop
-cp /etc/cfn/tools/eclipse/eclipse.desktop /home/maintuser/.local/share/applications/eclipse.desktop
-chown maintuser:maintuser /home/maintuser/.local/share/applications/eclipse.desktop
-chmod 600 /home/maintuser/.local/share/applications/eclipse.desktop
+cp /etc/cfn/tools/eclipse/eclipse.desktop /home/WorkstationUser/.local/share/applications/eclipse.desktop
+chown WorkstationUser:WorkstationUser /home/WorkstationUser/.local/share/applications/eclipse.desktop
+chmod 600 /home/WorkstationUser/.local/share/applications/eclipse.desktop
 
 #Install Intellij
 tar xfz /etc/cfn/tools/intellij/ideaIC-2018.3.3.tar.gz -C /opt/ || err_exit "Failed to unzip ideaIC-2018.3.3.tar.gz"
@@ -67,9 +67,9 @@ chmod -R 755 /opt/idea-IC-183.5153.38
 ln -s /opt/idea-IC-183.5153.38/bin/idea.sh /usr/local/bin/idea
 
 cp /etc/cfn/tools/intellij/jetbrains-idea-ce.desktop /usr/share/applications/jetbrains-idea-ce.desktop
-cp /etc/cfn/tools/intellij/jetbrains-idea-ce.desktop /home/maintuser/.local/share/applications/jetbrains-idea-ce.desktop
-chown maintuser:maintuser /home/maintuser/.local/share/applications/jetbrains-idea-ce.desktop
-chmod 600 /home/maintuser/.local/share/applications/jetbrains-idea-ce.desktop
+cp /etc/cfn/tools/intellij/jetbrains-idea-ce.desktop /home/WorkstationUser/.local/share/applications/jetbrains-idea-ce.desktop
+chown WorkstationUser:WorkstationUser /home/WorkstationUser/.local/share/applications/jetbrains-idea-ce.desktop
+chmod 600 /home/WorkstationUser/.local/share/applications/jetbrains-idea-ce.desktop
 
 #Install emacs
 yum -y install emacs || err_exit "Failed to install emacs"
@@ -102,9 +102,9 @@ chmod -R 755 /opt/pycharm-community-2018.3.3
 ln -s /opt/pycharm-community-2018.3.3/bin/pycharm.sh /usr/local/bin/pycharm 
 
 cp /etc/cfn/tools/pycharm/pycharm.desktop /usr/share/applications/pycharm.desktop
-cp /etc/cfn/tools/pycharm/pycharm.desktop /home/maintuser/.local/share/applications/pycharm.desktop
-chown maintuser:maintuser /home/maintuser/.local/share/applications/pycharm.desktop
-chmod 600 /home/maintuser/.local/share/applications/pycharm.desktop     
+cp /etc/cfn/tools/pycharm/pycharm.desktop /home/WorkstationUser/.local/share/applications/pycharm.desktop
+chown WorkstationUser:WorkstationUser /home/WorkstationUser/.local/share/applications/pycharm.desktop
+chmod 600 /home/WorkstationUser/.local/share/applications/pycharm.desktop     
 
 # Install asciidoctor tool chains 
 rpm -Uvh /etc/cfn/tools/asciidoctor/rubygem-asciidoctor-1.5.6.1-1.el7.noarch.rpm  
