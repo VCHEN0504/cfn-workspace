@@ -16,16 +16,16 @@ systemctl set-default graphical.target
 yum -y install tigervnc-server || err_exit "Failed to install TigerVNC Server."
 
 # Generate default VNC server password
-# The "VNCServerPaswd" will be replaced with the VNCServerPasswd parameter and "ProvisionUser" with the ProvisionUser parameter in the CFN during runtime
+# The "VNCServerPaswd" will be replaced with the VNCServerPasswd parameter and "WorkstationUser" with the WorkstationUser parameter in the CFN during runtime
 umask 0077
-mkdir -p /home/ProvisionUser/.vnc
-chmod go-rwx /home/ProvisionUser/.vnc
-vncpasswd -f <<<VNCServerPasswd> /home/ProvisionUser/.vnc/passwd
-chown -R ProvisionUser:ProvisionUser /home/ProvisionUser/.vnc
+mkdir -p /home/WorkstationUser/.vnc
+chmod go-rwx /home/WorkstationUser/.vnc
+vncpasswd -f <<<VNCServerPasswd> /home/WorkstationUser/.vnc/passwd
+chown -R WorkstationUser:WorkstationUser /home/WorkstationUser/.vnc
 
 # Configure VNC server
 cp /lib/systemd/system/vncserver@.service  /etc/systemd/system/vncserver@:1.service
-sed -i 's/<USER>/ProvisionUser/g' /etc/systemd/system/vncserver@:1.service
+sed -i 's/<USER>/WorkstationUser/g' /etc/systemd/system/vncserver@:1.service
 systemctl daemon-reload
 systemctl start vncserver@:1
 systemctl enable vncserver@:1
@@ -148,13 +148,12 @@ chmod -R 775 /var/www/html/
 systemctl restart httpd
 
 setenforce 0
-firewall-cmd --permanent --add-service=http
+#firewall-cmd --permanent --add-service=http
 firewall-cmd --permanent --add-service=https
 firewall-cmd --reload
 setenforce 1
 
 # Install Qt Assistant and creator
-#rpm -Uvh /etc/cfn/tools/qt/qt-assistant-4.8.7-2.el7.x86_64.rpm 
 yum -y install qt-creator || err_exit "Failed to install qt-creator"
 yum -y install qt-assistant || err_exit "Failed to install qt-assistant"
 

@@ -34,7 +34,8 @@ pipeline {
         string(name: 'CfnEndpointUrl', defaultValue: 'https://cloudformation.us-east-1.amazonaws.com', description: '(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com')
         string(name: 'EpelRepo', defaultValue: 'epel', description: 'Name of network-available EPEL repo.')
         string(name: 'InstallToolScriptURL', description: 'S3 URL of the script which executes commands to install various tools.')
-        string(name: 'InstallerUserName', defaultValue: '', description: 'Username to install software.')
+        string(name: 'WorkstationUserName', defaultValue: '', description: 'User name of the workstation owner.')
+        string(name: 'WorkstationUserPasswd', defaultValue: '', description: 'Default password of the workstation owner.')
         string(name: 'InstanceRole', defaultValue: '', description: '(Optional) IAM instance role to apply to the instance')
         string(name: 'InstanceType', defaultValue: '', description: 'Amazon EC2 instance type')
         string(name: 'KeyPairName', description: 'Public/private key pair used to allow an operator to securely connect to instance immediately after the instance-SSHD comes online')
@@ -85,8 +86,12 @@ pipeline {
                                 "ParameterValue": "${env.InstallToolScriptURL}"
                             },
                             {
-                                "ParameterKey": "InstallerUserName",
-                                "ParameterValue": "${env.InstallerUserName}"
+                                "ParameterKey": "WorkstationUserName",
+                                "ParameterValue": "${env.WorkstationUserName}"
+                            },
+                            {
+                                "ParameterKey": "WorkstationUserPasswd",
+                                "ParameterValue": "${env.WorkstationUserPasswd}"
                             },
                             {
                                 "ParameterKey": "InstanceRole",

@@ -132,12 +132,17 @@
       "Type": "String",
 	  "Default": ""
     },
-	"InstallerUserName": {
-      "Default": "maintuser",
-      "Description": "Username to install software.",
+	"WorkstationUserName": {
+      "Default": "",
+      "Description": "User name of the workstation owner.",
       "ConstraintDescription": "Alphanumeric string between 8 and 32 characters.",
       "MinLength": "8",
       "MaxLength": "32",
+      "Type": "String"
+    },
+	"WorkstationUserPasswd": {
+      "Default": "",
+      "Description": "Default password of the workstation owner",
       "Type": "String"
     },
     "InstanceRole": {
@@ -613,7 +618,7 @@
                 "command": { "Fn::Join" : [ "", [ "sed -i 's/StackName/", { "Ref": "AWS::StackName" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
               },
               "2-replace": {
-                "command": { "Fn::Join" : [ "", [ "sed -i 's/ProvisionUser/", { "Ref" : "ProvisionUser" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
+                "command": { "Fn::Join" : [ "", [ "sed -i 's/WorkstationUser/", { "Ref" : "WorkstationUserName" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
               },
               "3-replace": {
                  "command": { "Fn::Join" : [ "", [ "sed -i 's/VNCServerPasswd/", { "Ref" : "VNCServerPasswd" },  "/g' /etc/cfn/scripts/ws-tools.sh" ] ] }
@@ -695,9 +700,15 @@
                 "users:\n",
                 "  - default\n",
                 "  - name: ",
-                           { "Ref": "InstallerUserName" },
+                           { "Ref": "WorkstationUserName" },
                      "\n",
-                "    lock-passwd: True\n",
+                "    lock-passwd: False\n",
+                "\n",
+                "chpasswd:\n",
+                "  list: |",
+                           { "Ref": "WorkstationUserName" }:{ "Ref": "WorkstationUserPasswd" },
+                     "\n",
+                "    expire: False\n",
                 "\n",
 				"growpart:\n",
                 "  mode: auto\n",
