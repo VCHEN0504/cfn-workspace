@@ -1,0 +1,184 @@
+The objective of this prototype is to build a Linux version of workstation on AWS EC2 platform.  This is the initial effort for the the JIRA ticket UCODE-366 Research on Cloud Desktop Solution.  The status of the requirement gathering and research can be found at the comments attached to the sub-task UCODE-376.
+
+The Linux workstation is built using the following resources:
+1) EC2 AMI: spel-minimal-centos-7-hvm-2018.12.1.x86_64-gp2
+2) CloudFormation template: Templates/make_workspace_linux_EC2.tmplt.json
+3) Cloud-Init script:  SupportFiles/ws-tools.sh
+4) Jenkins pipeline job with Deployment/EC2-Instance.groovy script
+5) Tools bundle: https://s3.amazonaws.com/vchen-dev-bucket/tools/tools.tar.gz
+
+The soruce code reside at https://github.com/VCHEN0504/cfn-workspace.
+
+
+=============
+ws-tools.sh 
+=============
+The script installs the following applications/tools:
+
+	GNOME
+	VNC Server
+	Firefox - Default GNOME installation includes Firefox
+	Anaconda
+	ATOM
+	Eclipse
+	IntelliJ
+	Emacs
+	Gradle
+	Maven
+	Git
+	Ruby
+	Node.JS
+	Pycharm
+	Asciidoctor tool chains 
+	Visual Studio Code
+	Mongo db Client – Mongo Shell 
+	MySQL and MySQL Workbench
+	Joomla
+	Qt Assistant and creator 
+
+
+=============
+tools.tar.gz 
+=============
+Contains the following folders.  Inside each folder, it has tool binary file, shell script, and/or config file:
+
+	anaconda:  		anaconda.desktop, anaconda.sh
+	asciidoctor: 	demo.adoc, readme, rubygem-asciidoctor-1.5.6.1-1.el7.noarch.rpm 
+	atom: 			atom.x86_64.rpm
+	git:			endpoint-repo-1.7-1.x86_64.rpm
+	gradle:			gradle-5.1.1-bin.zip, gradle.sh
+	intellij:		ideaIC-2018.3.3.tar.gz, jetbrains-idea-ce.desktop
+	Joomla:			Joomla_3.9.2-Stable-Full_Package.tar.gz
+	mongo:			mongodb-org-shell-4.0.5-1.el7.x86_64.rpm
+	mysql:			epel-release-6-8.noarch.rpm, epel-release-7-11.noarch.rpm, 
+					mysql80-community-release-el7-1.noarch.rpm,
+					mysql-workbench-community-8.0.13-1.el7.x86_64.rpm
+	nodejs:			node-v11.6.0-linux-x64.tar.xz
+	pycharm:		pycharm-community-2018.3.3.tar.gz, pycharm.desktop
+	qt:				qt-assistant-4.8.7-2.el7.x86_64.rpm
+	vscode:			code-1.30.2-1546901769.el7.x86_64.rpm
+
+To build a tools.tar.gz:
+	cd <source home>
+	sudo tar -cvf tools.tar *
+	sudo gzip tools.tar
+	sudo aws s3 cp tools.tar.gz s3://<bucket and folder>/tools.tar.gz
+	sudo aws s3api put-object-acl --bucket <bucket name> --key <folder name>/tools.tar.gz --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers
+
+
+===========
+Jenkins Job
+===========
+An Jenkins job is created with the following parameters:
+
+	AwsRegion:  Amazon region to deploy resources info
+	AwsCred: Jenkins-stored AWS credential with which to execute cloud-layer commands
+	GitCred: Jenkins-stored Git credential with which to execute Git commands
+	GitProjUrl: SSH URL from which to download the Jenkins Git projet
+	GitProjBranch: Project-branch to use from the Jenkins git project
+	CfnStackRoot: Unique token to prepend to all stack-element names
+	TemplateUrl: S3-hosted URL for the EC2 CloudFormation template file
+	AdminPubkeyURL: S3-hosted URL for file containing admin-group SSH key-bundle
+	AmiId:  ID of the AMI to launch
+	CfnEndpointUrl: URL to the CloudFormation Endpoint. Default: https://cloudformation.us-east-1.amazonaws.com
+	EpelRepo: Name of network-available EPEL repo.  Default: epel
+	InstallToolScriptURL: S3-hosted URL for the scripts (e.g., ws-tools.sh) that executes commands to install various dev tools
+	WorkstationUserName: User name of the workstation owner
+	WorkstationUserPasswd: Default password of the workstation owner. 
+	InstanceRole: IAM instance role to apply to the instance
+	InstanceType: Amazon EC2 instance type
+	KeyPairName: Public/private key pair used to allow an operator to securely connect to instance immediately after the instance-SSHD comes online
+	NoPublicIp: Controls whether to assign the instance a public IP. Recommended to leave at 'true' _unless_ launching in a public subnet. Default: true
+	NoReboot: Controls whether to reboot the instance as the last step of cfn-init execution. Default: false
+	RipRpm: Name of preferred pip RPM. Default: python2-pip
+	PrivateIp: (Optional) Set a static, primary private IP. Leave blank to auto-select a free IP
+	ProvisionUserName: Name for remote-administration account
+	PyStache: Name of preferred pystache RPM. Default: pystache
+	RootVolumeSize: Size in GB of the EBS volume to create. If smaller than AMI default, create operation will fail; If larger, partition containing root device-volumes will be upsized. Recommend: 50
+	SecurityGroupIds: List of security groups to apply to the instance
+	SubnetId: ID of the subnet to assign to the instance
+	ToolsURL: S3-hosted URL for the gzip/tar file which contains all of the dev tools binaries
+	VNCServerPasswd: Default VNC server password. (Specific to VNC's requirement) Password must contain at least one letter, at least one number, and be longer than six characters.
+	WatchmakerConfig: (Optional) Path to a Watchmaker config file.  The config file path can be a remote source (i.e. http[s]://, s3://) or local directory (i.e. file://)
+	WatchmakerEnvironment: Environment in which the instance is being deployed. Default: dev
+	SSHKey:  Provision User's SSH Key
+
+Pipeline Definition: Fill in the following fields
+	SCM: Git
+	Repository URL:  
+	Credential: 
+	
+Pipeline Script Path: Fill in "Deployment/EC2-Instance.groovy"
+	
+
+========================================================
+Instruction on buidling and using the Linux workstation
+========================================================
+Prerequisites:
+	1) Create the following three credentials in Jenkins:
+		a) AwsCred: Jenkins-stored AWS credential with which to execute cloud-layer commands
+		b) GitCred: Jenkins-stored Git credential (user name and password) with which to execute Git commands
+		c) SSHKey:  SSH user name and private key	
+	2) The SSH public key is added to the file, specified in the AdminPubkeyURL parameter
+	3) An Jenkins job is created and pre-configured as per the instruction above.
+	4) The CloudFormation template, Cloud-init script, and tool bundles are uploaded to S3. The S3 URLS will be specified in the Jenkins TemplateUrl, InstallToolScriptURL, and ToolsURL parameters
+	5) An AWS EC2 instance profile/role with correct permissions have been creasted.  It will be used in the Jenkins InstanceRole parameter.
+	6) An AWS Security Group(s) have been created. It will be specified in the Jenkins SecurityGroupIds parameter
+
+Steps:
+	1) Build the Jenkins job with parameters (see the list of parameters above). Based on the current CloudFormation template, it takes around 25 minutes to complete.  The template timeout is set to 45 minutes.
+	2) Once the EC2 is created successfully, connect to rdsh.dicelab.net. 
+	3) Start pageant, and add your SSH private key
+	4) Use putty or MobaXterm to connect to the EC2 using the account name, specified in the ProvisionUserName parameter
+
+		On MobaXTerm, create a SSH session:
+			a. Click Session -> SSH -> Enter Remote Host with the EC2 private IP adress
+			b. Click Advanced SSH settings, check the "Use private key" box and enter the location of the SSH private key
+		
+	3) Set a default password for the workstation owner, specified in the WorkstationUserName parameter.  Note: the CloudFormation template can be enhanced to automate this step. 
+
+	4) On MobaXterm, crate a VNC session:
+		a. Click Session -> VNC -> Enter Remote Host with the EC2 private IP adress and change the port to 5901
+		
+	5) Start VNC, and enter the password when prompted, the password is specified in the VNCServerPasswd parameter.
+	6) Verify the installation of the tools:
+
+		a) The following IDE apps can be accessed at the Application menu -> programming sub-menu
+			Anaconda
+			Atom
+			EclipseEmac
+			Git
+			Intellij IDEA
+			MySQL
+			PyCharm
+			Q4 Assistant
+			QT Creator
+			Virtual Studio Code
+			
+		
+		b) The following command line tools, type the following commands to verify: 
+			gradle -v
+			mvn -version
+			ruby -v
+			node -v
+			npm -v
+			mongo -version
+			asciidoc -v
+
+
+=================
+Future Enhancement
+==================
+	1) The ws-tools.sh only does default installation. Further configuratin for each tool may be required.
+	2) Consideration for further automation using CloudFormation: 
+		a) Create EC2 instance profile and instance role
+		b) Create Security Group(s)
+	3) Add constraints to Jenkins WorkstationUserName, WorkstationUserPasswd, and ProvisionUser, the value must be complied with agency's security policy
+	4) The following code does not work in the UserData section of the CloudForamtion template, require further troubleshoot.  Workaround: manually set a default password for the workstation owner.
+	
+		"chpasswd:\n",
+		"  expire: False\n",
+		"  list: |\n",
+				   { "Ref": "WorkstationUserName" },
+				   ": ",
+				   { "Ref": "WorkstationUserPasswd" },
