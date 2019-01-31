@@ -727,7 +727,7 @@
                 "          done\n",
                 "        \n",
                 "        vgdisplay -s\n",
-				"        # Extend the root by 20G and home volume by 10 GB\n",
+				"        # Extend the root and home volume by 10 GB\n",
                 "        \n",
                 "        lvextend --size +20G --resizefs /dev/VolGroup00/rootVol\n",
                 "        lvextend --size +10G --resizefs /dev/mapper/VolGroup00-homeVol\n",
