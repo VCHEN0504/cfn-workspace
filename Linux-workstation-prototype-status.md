@@ -1,4 +1,4 @@
-#Linux Workstation
+# Linux Workstation
 
 This project is to provide an automated mechanism for provisioning a Linux workstation that hosts on AWS and runs various development software. 
 
