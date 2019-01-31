@@ -122,15 +122,15 @@ Set Pipeline Script Path: Fill in "Deployment/EC2-Instance.groovy"
 ## Instruction on buidling and using the Linux workstation
 
 Prerequisites:
-# Create the following three credentials in Jenkins:
-	# AwsCred: Jenkins-stored AWS credential with which to execute cloud-layer commands
-	# GitCred: Jenkins-stored Git credential (user name and password) with which to execute Git commands
-	# SSHKey:  SSH user name and private key	
-# The SSH public key is added to the file, specified in the AdminPubkeyURL parameter
-# An Jenkins job is created and pre-configured as per the instruction above.
-# The CloudFormation template, Cloud-init script, and tool bundles are uploaded to S3. The S3 URLS will be specified in the Jenkins TemplateUrl, InstallToolScriptURL, and ToolsURL parameters
-# An AWS EC2 instance profile/role with correct permissions have been creasted.  It will be used in the Jenkins InstanceRole parameter.
-# An AWS Security Group(s) have been created. It will be specified in the Jenkins SecurityGroupIds parameter
+1. Create the following three credentials in Jenkins:
+	1. AwsCred: Jenkins-stored AWS credential with which to execute cloud-layer commands
+	1. GitCred: Jenkins-stored Git credential (user name and password) with which to execute Git commands
+	1. SSHKey:  SSH user name and private key	
+1. The SSH public key is added to the file, specified in the AdminPubkeyURL parameter
+1. An Jenkins job is created and pre-configured as per the instruction above.
+1. The CloudFormation template, Cloud-init script, and tool bundles are uploaded to S3. The S3 URLS will be specified in the Jenkins TemplateUrl, InstallToolScriptURL, and ToolsURL parameters
+1. An AWS EC2 instance profile/role with correct permissions have been creasted.  It will be used in the Jenkins InstanceRole parameter.
+1. An AWS Security Group(s) have been created. It will be specified in the Jenkins SecurityGroupIds parameter
 
 Steps:
 1. Build the Jenkins job with parameters (see the list of parameters above). Based on the current CloudFormation template, it takes around 25 minutes to complete.  The template timeout is set to 45 minutes.
@@ -138,39 +138,39 @@ Steps:
 1. Start pageant, and add your SSH private key
 1. Use putty or MobaXterm to connect to the EC2 using the account name, specified in the ProvisionUserName parameter
 
-	# On MobaXTerm, create a SSH session:
+	* On MobaXTerm, create a SSH session:
 		1. Click Session -> SSH -> Enter Remote Host with the EC2 private IP adress
 		1. Click Advanced SSH settings, check the "Use private key" box and enter the location of the SSH private key
 		
 1. Set a default password for the workstation owner, specified in the WorkstationUserName parameter.  Note: the CloudFormation template can be enhanced to automate this step. 
 
 1. On MobaXterm, crate a VNC session:
-	# Click Session -> VNC -> Enter Remote Host with the EC2 private IP adress and change the port to 5901
+	* Click Session -> VNC -> Enter Remote Host with the EC2 private IP adress and change the port to 5901
 		
 1. Start VNC, and enter the password when prompted, the password is specified in the VNCServerPasswd parameter.
 1. Verify the installation of the tools:
 
 	1. The following IDE apps can be accessed at the Application menu -> programming sub-menu
-		# Anaconda
-		# Atom
-		# EclipseEmac
-		# Git
-		# Intellij IDEA
-		# MySQL
-		# PyCharm
-		# Q4 Assistant
-		# QT Creator
-		# Virtual Studio Code
+		* Anaconda
+		* Atom
+		* EclipseEmac
+		* Git
+		* Intellij IDEA
+		* MySQL
+		* PyCharm
+		* Q4 Assistant
+		* QT Creator
+		* Virtual Studio Code
 			
 		
 	1. The following command line tools, type the following commands to verify: 
-		# gradle -v
-		# mvn -version
-		# ruby -v
-		# node -v
-		# npm -v
-		# mongo -version
-		# asciidoc -v
+		* gradle -v
+		* mvn -version
+		* ruby -v
+		* node -v
+		* npm -v
+		* mongo -version
+		* asciidoc -v
 
 ## Future Enhancement
 
