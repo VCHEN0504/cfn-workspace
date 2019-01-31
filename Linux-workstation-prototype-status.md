@@ -15,15 +15,15 @@ At the time of this writing, a prototype of Linux Workstation has been created u
 * Jenkins pipeline job with Deployment/EC2-Instance.groovy script
 * Tools bundle
 
-##EC2 AMI
+## EC2 AMI
 
 The spel-minimal-centos-7-hvm-2018.12.1.x86_64-gp2 is the hardened AWS AMI image that our customer approves.
 
-##CloudFormation
+## CloudFormation
 
 The Templates/make_workspace_linux_EC2.tmplt.json creates an EC2 instance, downloads scripts and tools bundle from S3, and executes the script to install all of the software listed below.
 
-##Cloud-Init script
+## Cloud-Init script
 
 The SupportFiles/ws-tools.sh installs the following applications/tools.  It references the latest versions of software as the time of this writing.  
 
@@ -76,7 +76,7 @@ To build a tools.tar.gz:
 	_aws s3api put-object-acl --bucket <bucket name> --key <folder name>/tools.tar.gz --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers_
 ```
 
-##Jenkins Job
+## Jenkins Job
 
 An Jenkins pipeline job is created with the following parameters:
 
@@ -119,7 +119,7 @@ Set Pipeline Definition: Fill in the following fields
 	
 Set Pipeline Script Path: Fill in "Deployment/EC2-Instance.groovy"
 	
-##Instruction on buidling and using the Linux workstation
+## Instruction on buidling and using the Linux workstation
 
 Prerequisites:
 # Create the following three credentials in Jenkins:
