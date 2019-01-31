@@ -15,7 +15,7 @@ Due to the above issues/limitations, the [SPEL AMI](https://github.com/plus3it/s
 
 ## Current Status
 
-At the time of this document's writing, a prototype of Linux Workstation has been created. Note that the current state is sufficiently nascent as to be neither a release candidate nor a "developer preview" or "beta" release. The current prototyp makes use of the following tooling and resources:
+At the time of this document's writing, a prototype of Linux Workstation has been created. Note that the current state is sufficiently nascent as to be neither a release candidate nor a "developer preview" or "beta" release. The current prototype makes use of the following tooling and resources:
 
 * EC2 AMI: [spel-minimal-centos-7-hvm](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:visibility=public-images;ownerAlias=701759196663;name=spel-minimal-centos-7-hvm-.*x86_64-gp2;sort=desc:creationDate) (tested with [December 2018](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:visibility=public-images;ownerAlias=701759196663;name=spel-minimal-centos-7-hvm-2018.12.*x86_64-gp2;sort=desc:creationDate) version)
 * CloudFormation template: [`make_workspace_linux_EC2.tmplt.json`](Templates/make_workspace_linux_EC2.tmplt.json)
