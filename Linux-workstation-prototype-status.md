@@ -150,7 +150,7 @@ Steps:
 1. Start VNC, and enter the password when prompted, the password is specified in the VNCServerPasswd parameter.
 1. Verify the installation of the tools:
 
-	1. The following IDE apps can be accessed at the Application menu -> programming sub-menu
+	* The following IDE apps can be accessed at the Application menu -> programming sub-menu
 		* Anaconda
 		* Atom
 		* EclipseEmac
@@ -163,7 +163,7 @@ Steps:
 		* Virtual Studio Code
 			
 		
-	1. The following command line tools, type the following commands to verify: 
+	* The following command line tools, type the following commands to verify: 
 		* gradle -v
 		* mvn -version
 		* ruby -v
